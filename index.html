@@ -23,12 +23,12 @@
   button.f.on { background:var(--f); border-color:var(--f); }
   button.t.on { background:var(--t); border-color:var(--t); }
   
-  /* ESTILOS DO LOGIN E FORMULÁRIO */
   #auth-area { display: flex; gap: 10px; align-items: center; }
-  #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; } /* Começa oculto até carregar */
+  #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; }
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
   #create-form { display: none; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--line); margin: 8px 12px; gap: 8px; flex-wrap: wrap; }
-  #create-form input, #create-form select { padding: 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--text); }
+  #create-form input, #create-form select, #create-form textarea { padding: 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--text); }
+  #create-form textarea { width: 100%; min-height: 60px; resize: vertical; font-family: inherit; }
   #create-form button { background: var(--f); color: white; border: none; }
 
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
@@ -95,7 +95,6 @@
     <span id="title"></span>
   </div>
   
-  <!-- ÁREA DE LOGIN (Só aparece quando o script carrega) -->
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
     <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
@@ -116,21 +115,14 @@
   </div>
 </header>
 
-<!-- Formulário de Criação de Eventos (Só aparece após login) -->
+<!-- Formulário de Criação de Eventos -->
 <div id="create-form">
   <span class="lbl" style="font-weight:bold;">➕ Novo Evento:</span>
-  <select id="new-cal-id">
-    <option value="suportegtek@gmail.com">FUNCIONAL - Principal</option>
-    <option value="5va1iabu6so4b8vac91chp8fp0@group.calendar.google.com">FUNCIONAL - Ausente</option>
-    <option value="9cf8f93130afa2c2a131d892baee7b4e5d94d1ae4d893eb31801eb5aeea426d2@group.calendar.google.com">FUNCIONAL - Férias GtekSM</option>
-    <option value="c976c68aa5aa453a0ce4a41f12e0f138e4266a7b808ee508a82b32aeb985a29c@group.calendar.google.com">FUNCIONAL - Férias GtekXAP</option>
-    <option value="classroom112528712237241703198@group.calendar.google.com">FUNCIONAL - Implantação</option>
-    <option value="jnieb411k2g5ikmrkt4bdoupk0@group.calendar.google.com">FUNCIONAL - Treinamentos Xap</option>
-    <option value="tigteksm@gmail.com">TECNICA - Principal</option>
-  </select>
+  <select id="new-cal-id"></select>
   <input type="text" id="new-title" placeholder="Título do evento" style="flex:1; min-width: 150px;">
   <input type="datetime-local" id="new-start">
   <input type="datetime-local" id="new-end">
+  <textarea id="new-desc" placeholder="Descrição/Conteúdo do evento (opcional)"></textarea>
   <button onclick="createNewEvent()">Salvar Evento</button>
 </div>
 
@@ -141,14 +133,10 @@
 
 <div id="ov"><div id="box"></div></div>
 
-<!-- Bibliotecas do Google (OAuth e API) -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 
 <script>
-  // ============================================================
-  // ⚠️ CONFIGURAÇÃO: COLE SEU CLIENT ID ABAIXO ⚠️
-  // ============================================================
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
   
@@ -181,7 +169,6 @@
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
 
-  // --- INICIALIZAÇÃO DO GOOGLE API ---
   function gapiLoaded() {
     gapi.load('client', initializeGapiClient);
   }
@@ -213,13 +200,14 @@
           document.getElementById('logout-btn').style.display = 'inline-block';
           document.getElementById('create-form').style.display = 'flex';
           document.getElementById('auth-status').textContent = "✅ Conectado";
-          load(); // Recarrega a agenda com os dados reais
+          updateCalendarSelect(); // Atualiza o select baseado no filtro atual
+          load();
         },
       });
       gisInited = true;
       maybeEnableButtons();
     } catch (err) {
-      console.error("Erro ao iniciar GIS (verifique o CLIENT_ID):", err);
+      console.error("Erro ao iniciar GIS:", err);
       document.getElementById('auth-status').textContent = "Erro: Client ID inválido.";
     }
   }
@@ -241,6 +229,37 @@
       google.accounts.oauth2.revoke(token.access_token, () => {
         location.reload();
       });
+    }
+  }
+
+  // Função para atualizar o select de agendas baseado no filtro atual
+  function updateCalendarSelect() {
+    const select = document.getElementById('new-cal-id');
+    select.innerHTML = ''; // Limpa todas as opções
+    
+    const show = state.show;
+    
+    if (show === 'f' || show === 'ft') {
+      CAL.f.sources.forEach(function(src) {
+        const option = document.createElement('option');
+        option.value = src.id;
+        option.textContent = 'FUNCIONAL - ' + src.name;
+        select.appendChild(option);
+      });
+    }
+    
+    if (show === 't' || show === 'ft') {
+      CAL.t.sources.forEach(function(src) {
+        const option = document.createElement('option');
+        option.value = src.id;
+        option.textContent = 'TECNICA - ' + src.name;
+        select.appendChild(option);
+      });
+    }
+    
+    // Seleciona a primeira opção por padrão
+    if (select.options.length > 0) {
+      select.selectedIndex = 0;
     }
   }
 
@@ -356,6 +375,7 @@
     const title = document.getElementById('new-title').value;
     const startVal = document.getElementById('new-start').value;
     const endVal = document.getElementById('new-end').value;
+    const desc = document.getElementById('new-desc').value;
 
     if (!title || !startVal || !endVal) {
       alert("Preencha o título, data de início e fim.");
@@ -364,6 +384,7 @@
 
     const event = {
       summary: title,
+      description: desc,
       start: { dateTime: new Date(startVal).toISOString(), timeZone: 'America/Sao_Paulo' },
       end: { dateTime: new Date(endVal).toISOString(), timeZone: 'America/Sao_Paulo' }
     };
@@ -374,6 +395,7 @@
     }).then(function() {
       alert("Evento criado com sucesso!");
       document.getElementById('new-title').value = '';
+      document.getElementById('new-desc').value = '';
       load();
     }).catch(function(err) {
       alert("Erro ao criar evento. Verifique se você tem permissão de 'Fazer alterações' nesta agenda.\nDetalhe: " + (err.result ? err.result.error.message : err.message));
@@ -514,7 +536,13 @@
   document.getElementById("prev").onclick = function () { move(-1); };
   document.getElementById("next").onclick = function () { move(1); };
   document.getElementById("today").onclick = function () { state.cursor = sod(new Date()); load(); };
-  document.querySelectorAll("[data-show]").forEach(function (b) { b.onclick = function () { state.show = b.dataset.show; load(); }; });
+  document.querySelectorAll("[data-show]").forEach(function (b) { 
+    b.onclick = function () { 
+      state.show = b.dataset.show; 
+      updateCalendarSelect(); // Atualiza o select quando muda o filtro
+      load(); 
+    }; 
+  });
   document.querySelectorAll("[data-mode]").forEach(function (b) { b.onclick = function () { state.mode = b.dataset.mode; load(); }; });
   document.getElementById("ov").onclick = function (e) { if (e.target.id === "ov") closeModal(); };
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
