@@ -26,10 +26,6 @@
   #auth-area { display: flex; gap: 10px; align-items: center; }
   #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; }
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
-  #create-form { display: none; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--line); margin: 8px 12px; gap: 8px; flex-wrap: wrap; }
-  #create-form input, #create-form select, #create-form textarea { padding: 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--text); }
-  #create-form textarea { width: 100%; min-height: 60px; resize: vertical; font-family: inherit; }
-  #create-form button { background: var(--f); color: white; border: none; }
 
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
@@ -179,9 +175,6 @@
   }
   #box .field textarea { min-height: 80px; resize: vertical; }
   
-  #box .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  #box .row-fields-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  
   #box .time-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -246,7 +239,6 @@
   #box.t .desc-display { border-left-color: var(--t); }
   #box.f .desc-display { border-left-color: var(--f); }
   
-  /* Scrollbar moderna */
   #box::-webkit-scrollbar { width: 6px; }
   #box::-webkit-scrollbar-track { background: transparent; }
   #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
@@ -282,16 +274,6 @@
   </div>
 </header>
 
-<div id="create-form">
-  <span class="lbl" style="font-weight:bold;">➕ Novo Evento Rápido:</span>
-  <select id="new-cal-id"></select>
-  <input type="text" id="new-title" placeholder="Título do evento" style="flex:1; min-width: 150px;">
-  <input type="datetime-local" id="new-start">
-  <input type="datetime-local" id="new-end">
-  <textarea id="new-desc" placeholder="Descrição/Conteúdo do evento (opcional)"></textarea>
-  <button onclick="createNewEvent()">Salvar Evento</button>
-</div>
-
 <main>
   <section class="panel f" id="pf"><div class="tag">FUNCIONAL</div><div class="legend" id="lf"></div><div class="body" id="bf"></div></section>
   <section class="panel t" id="pt"><div class="tag">TECNICA</div><div class="legend" id="lt"></div><div class="body" id="bt"></div></section>
@@ -310,7 +292,8 @@
   let tokenClient;
   let gapiInited = false;
   let gisInited = false;
-  let currentEditEvent = null; // Evento sendo editado
+  let currentEditEvent = null;
+  let isUserLoggedIn = false;
 
   var CAL = {
     f: { name: "FUNCIONAL", sources: [
@@ -337,7 +320,6 @@
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
 
-  // Gera opções de hora (00-23) e minuto (00, 15, 30, 45)
   function generateTimeOptions() {
     const hours = [];
     for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0'));
@@ -355,6 +337,7 @@
       });
       gapiInited = true;
       maybeEnableButtons();
+      checkSavedSession();
     } catch (err) {
       console.error("Erro ao iniciar GAPI:", err);
       document.getElementById('auth-status').textContent = "Erro ao carregar API.";
@@ -372,16 +355,16 @@
             alert("Erro no login: " + resp.error);
             return;
           }
-          document.getElementById('login-btn').style.display = 'none';
-          document.getElementById('logout-btn').style.display = 'inline-block';
-          document.getElementById('create-form').style.display = 'flex';
-          document.getElementById('auth-status').textContent = "✅ Conectado";
-          updateCalendarSelect();
-          load();
+          // Salvar token na sessionStorage para persistir durante F5
+          sessionStorage.setItem('gcal_access_token', resp.access_token);
+          sessionStorage.setItem('gcal_token_expiry', Date.now() + (resp.expires_in * 1000));
+          
+          onLoginSuccess();
         },
       });
       gisInited = true;
       maybeEnableButtons();
+      checkSavedSession();
     } catch (err) {
       console.error("Erro ao iniciar GIS:", err);
       document.getElementById('auth-status').textContent = "Erro: Client ID inválido.";
@@ -391,8 +374,49 @@
   function maybeEnableButtons() {
     if (gapiInited && gisInited) {
       document.getElementById('auth-status').style.display = 'none';
-      document.getElementById('login-btn').style.display = 'inline-block';
+      // Só mostra o botão de login se NÃO estiver logado
+      if (!isUserLoggedIn) {
+        document.getElementById('login-btn').style.display = 'inline-block';
+      }
     }
+  }
+
+  // Verifica se existe token salvo na sessionStorage (persiste durante F5)
+  function checkSavedSession() {
+    if (!gapiInited || !gisInited) return;
+    
+    const savedToken = sessionStorage.getItem('gcal_access_token');
+    const savedExpiry = sessionStorage.getItem('gcal_token_expiry');
+    
+    if (savedToken && savedExpiry) {
+      const now = Date.now();
+      const expiry = parseInt(savedExpiry);
+      
+      // Se o token ainda não expirou (com margem de 5 minutos)
+      if (now < expiry - 300000) {
+        // Restaura o token no gapi
+        gapi.client.setToken({ access_token: savedToken });
+        onLoginSuccess();
+        return;
+      } else {
+        // Token expirado, limpa
+        sessionStorage.removeItem('gcal_access_token');
+        sessionStorage.removeItem('gcal_token_expiry');
+      }
+    }
+    
+    // Não há sessão válida, mostra botão de login
+    document.getElementById('login-btn').style.display = 'inline-block';
+    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('auth-status').textContent = 'Faça login para acessar sua agenda.';
+  }
+
+  function onLoginSuccess() {
+    isUserLoggedIn = true;
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'inline-block';
+    document.getElementById('auth-status').textContent = "✅ Conectado";
+    load();
   }
 
   function handleAuthClick() {
@@ -400,35 +424,21 @@
   }
 
   function handleSignoutClick() {
-    const token = google.accounts.oauth2.getToken();
+    // Limpa a sessionStorage (sessão será perdida)
+    sessionStorage.removeItem('gcal_access_token');
+    sessionStorage.removeItem('gcal_token_expiry');
+    
+    const token = gapi.client.getToken();
     if (token && token.access_token) {
       google.accounts.oauth2.revoke(token.access_token, () => {
+        gapi.client.setToken(null);
+        isUserLoggedIn = false;
         location.reload();
       });
+    } else {
+      isUserLoggedIn = false;
+      location.reload();
     }
-  }
-
-  function updateCalendarSelect() {
-    const select = document.getElementById('new-cal-id');
-    select.innerHTML = '';
-    const show = state.show;
-    if (show === 'f' || show === 'ft') {
-      CAL.f.sources.forEach(function(src) {
-        const option = document.createElement('option');
-        option.value = src.id;
-        option.textContent = 'FUNCIONAL - ' + src.name;
-        select.appendChild(option);
-      });
-    }
-    if (show === 't' || show === 'ft') {
-      CAL.t.sources.forEach(function(src) {
-        const option = document.createElement('option');
-        option.value = src.id;
-        option.textContent = 'TECNICA - ' + src.name;
-        select.appendChild(option);
-      });
-    }
-    if (select.options.length > 0) select.selectedIndex = 0;
   }
 
   function getRange() {
@@ -515,7 +525,6 @@
     document.getElementById("ov").classList.add("show");
   }
   
-  // Modal de VISUALIZAÇÃO de evento existente (com botão editar)
   function openEvent(key, ev) {
     openModal(key, function (body, header) {
       header.querySelector('h2')?.remove();
@@ -537,7 +546,7 @@
       
       var meta = document.createElement('div');
       meta.className = 'event-meta';
-      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : '');
+      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br> ' + ev.loc : '');
       body.appendChild(meta);
       
       if (ev.desc) { 
@@ -558,7 +567,7 @@
       
       var btnGcal = document.createElement('a');
       btnGcal.className = 'btn btn-link';
-      btnGcal.innerHTML = '🔗 Google Agenda';
+      btnGcal.innerHTML = ' Google Agenda';
       btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`;
       btnGcal.target = "_blank";
       actions.appendChild(btnGcal);
@@ -574,7 +583,6 @@
     });
   }
 
-  // Modal de EDIÇÃO/CRIAÇÃO estilo post-it
   function openEditModal(key, ev) {
     currentEditEvent = ev;
     const isEdit = !!ev;
@@ -589,14 +597,13 @@
       header.querySelector('h2')?.remove();
       header.querySelector('.subtitle')?.remove();
       var h2 = document.createElement('h2');
-      h2.textContent = isEdit ? '✏️ Editar Evento' : '➕ Novo Evento';
+      h2.textContent = isEdit ? '️ Editar Evento' : '➕ Novo Evento';
       var subtitle = document.createElement('div');
       subtitle.className = 'subtitle';
       subtitle.textContent = calName;
       header.insertBefore(subtitle, header.firstChild);
       header.insertBefore(h2, header.firstChild);
       
-      // Campo Título
       var fieldTitle = document.createElement('div');
       fieldTitle.className = 'field';
       var lblTitle = document.createElement('label');
@@ -610,7 +617,6 @@
       fieldTitle.appendChild(inpTitle);
       body.appendChild(fieldTitle);
       
-      // Seletor de agenda (só aparece se FUNCIONAL e não está editando)
       if (key === 'f' && !isEdit && many(key)) {
         var fieldCal = document.createElement('div');
         fieldCal.className = 'field';
@@ -636,7 +642,6 @@
         body.appendChild(hiddenCal);
       }
       
-      // Data Início
       var fieldStart = document.createElement('div');
       fieldStart.className = 'field';
       var lblStart = document.createElement('label');
@@ -649,7 +654,6 @@
       fieldStart.appendChild(inpStart);
       body.appendChild(fieldStart);
       
-      // Hora Início (Horas + Minutos)
       var fieldStartTime = document.createElement('div');
       fieldStartTime.className = 'field';
       var lblStartTime = document.createElement('label');
@@ -694,7 +698,6 @@
       fieldStartTime.appendChild(timeGroupStart);
       body.appendChild(fieldStartTime);
       
-      // Data Fim
       var fieldEnd = document.createElement('div');
       fieldEnd.className = 'field';
       var lblEnd = document.createElement('label');
@@ -707,7 +710,6 @@
       fieldEnd.appendChild(inpEnd);
       body.appendChild(fieldEnd);
       
-      // Hora Fim
       var fieldEndTime = document.createElement('div');
       fieldEndTime.className = 'field';
       var lblEndTime = document.createElement('label');
@@ -751,7 +753,6 @@
       fieldEndTime.appendChild(timeGroupEnd);
       body.appendChild(fieldEndTime);
       
-      // Descrição
       var fieldDesc = document.createElement('div');
       fieldDesc.className = 'field';
       var lblDesc = document.createElement('label');
@@ -764,7 +765,6 @@
       fieldDesc.appendChild(txtDesc);
       body.appendChild(fieldDesc);
       
-      // Ações
       var actions = document.createElement('div');
       actions.className = 'postit-actions';
       
@@ -792,7 +792,6 @@
     });
   }
 
-  // Modal de criação ao clicar em dia vazio
   function openDayCreateModal(key, day) {
     const fakeEv = {
       src: { id: getDefaultCalendarId(key), name: key === 'f' ? 'Principal' : 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' },
@@ -806,10 +805,7 @@
   }
 
   function getDefaultCalendarId(key) {
-    if (key === 'f') {
-      if (state.show === 'f') return CAL.f.sources[0].id;
-      return CAL.f.sources[0].id;
-    }
+    if (key === 'f') return CAL.f.sources[0].id;
     return CAL.t.sources[0].id;
   }
 
@@ -881,38 +877,6 @@
     });
   }
 
-  function createNewEvent() {
-    const calId = document.getElementById('new-cal-id').value;
-    const title = document.getElementById('new-title').value;
-    const startVal = document.getElementById('new-start').value;
-    const endVal = document.getElementById('new-end').value;
-    const desc = document.getElementById('new-desc').value;
-
-    if (!title || !startVal || !endVal) {
-      alert("Preencha o título, data de início e fim.");
-      return;
-    }
-
-    const event = {
-      summary: title,
-      description: desc,
-      start: { dateTime: new Date(startVal).toISOString(), timeZone: 'America/Sao_Paulo' },
-      end: { dateTime: new Date(endVal).toISOString(), timeZone: 'America/Sao_Paulo' }
-    };
-
-    gapi.client.calendar.events.insert({
-      calendarId: calId,
-      resource: event
-    }).then(function() {
-      alert("Evento criado com sucesso!");
-      document.getElementById('new-title').value = '';
-      document.getElementById('new-desc').value = '';
-      load();
-    }).catch(function(err) {
-      alert("Erro ao criar evento: " + (err.result ? err.result.error.message : err.message));
-    });
-  }
-
   function openDay(key, day, evs) {
     openModal(key, function (body, header) {
       header.querySelector('h2')?.remove();
@@ -975,7 +939,6 @@
         (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list);
         c.appendChild(m);
       }
-      // Clique no dia vazio abre modal de criação
       (function(dd) {
         c.onclick = function() {
           if (list.length === 0) {
@@ -1092,21 +1055,12 @@
   document.querySelectorAll("[data-show]").forEach(function (b) { 
     b.onclick = function () { 
       state.show = b.dataset.show; 
-      updateCalendarSelect();
       load(); 
     }; 
   });
   document.querySelectorAll("[data-mode]").forEach(function (b) { b.onclick = function () { state.mode = b.dataset.mode; load(); }; });
   document.getElementById("ov").onclick = function (e) { if (e.target.id === "ov") closeModal(); };
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
-  
-  window.onload = function() {
-    const now = new Date();
-    const later = new Date(now.getTime() + 60*60*1000);
-    const formatDT = (d) => d.toISOString().slice(0, 16);
-    document.getElementById('new-start').value = formatDT(now);
-    document.getElementById('new-end').value = formatDT(later);
-  };
 </script>
 
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
