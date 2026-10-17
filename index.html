@@ -42,10 +42,11 @@
   .msg.err { color:#c5221f; }
   .grid { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); }
   .dow { padding:5px; text-align:center; font-size:.72rem; color:var(--muted); border-bottom:1px solid var(--line); text-transform:uppercase; position:sticky; top:0; background:var(--card); z-index:1; }
-  .cell { min-height:92px; padding:3px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; }
+  .cell { min-height:92px; padding:3px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; cursor: pointer; transition: background 0.2s; }
   .cell:nth-child(7n) { border-right:0; }
   .cell.other { opacity:.5; }
   .cell.today { background:var(--today); }
+  .cell:hover { background: rgba(26, 115, 232, 0.08); }
   .num { font-size:.75rem; color:var(--muted); padding:1px 3px; }
   .today .num { color:var(--accent); font-weight:700; }
   .chip { display:block; width:100%; text-align:left; margin:1px 0; padding:2px 5px; border:0; border-radius:4px; font-size:.74rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; }
@@ -70,19 +71,185 @@
   .list .row { display:flex; gap:10px; width:100%; text-align:left; border:0; border-radius:6px; padding:5px 6px; background:none; font-size:.88rem; }
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
-  #ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; }
+
+  /* ========== MODAL POST-IT MODERNO ========== */
+  #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
-  #box { background:var(--card); color:var(--text); border-radius:12px; max-width:480px; width:100%; max-height:85vh; overflow:auto; padding:18px; border-top:6px solid var(--f); }
-  #box.t { border-top-color:var(--t); }
-  #box h2 { margin:0 0 4px; font-size:1.15rem; }
-  #box .meta { color:var(--muted); margin:4px 0; }
-  #box .desc { white-space:pre-wrap; margin-top:10px; word-break:break-word; }
-  #box a { color:var(--accent); }
-  #box .close { float:right; margin-left:10px; }
-  .item { display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--line); border-radius:0; padding:8px 4px; background:none; }
-  .action-btn { display: block; width: 100%; padding: 8px; margin-top: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
-  .btn-delete { background: #c5221f; color: white; }
-  .btn-edit { background: #1a73e8; color: white; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  #box { 
+    background: #fffef7; 
+    color: #1f2937; 
+    border-radius: 4px; 
+    max-width: 440px; 
+    width: 100%; 
+    max-height: 90vh; 
+    overflow-y: auto; 
+    padding: 0;
+    box-shadow: 
+      0 20px 60px rgba(0,0,0,0.3),
+      0 0 0 1px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    animation: slideUp 0.25s ease;
+    position: relative;
+  }
+  #box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 4px 4px 0 0;
+  }
+  #box.t::before { background: var(--t); }
+  #box.f::before { background: var(--f); }
+  
+  #box .postit-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  #box .postit-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    flex: 1;
+  }
+  #box .postit-header .subtitle {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  #box .close {
+    background: rgba(0,0,0,0.06);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  #box .close:hover { background: rgba(0,0,0,0.12); color: #111827; }
+  
+  #box .postit-body { padding: 16px 24px 24px; }
+  
+  #box .field { margin-bottom: 14px; }
+  #box .field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  #box .field input,
+  #box .field select,
+  #box .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: #fff;
+    color: #111827;
+    transition: all 0.15s;
+  }
+  #box .field input:focus,
+  #box .field select:focus,
+  #box .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+  }
+  #box .field textarea { min-height: 80px; resize: vertical; }
+  
+  #box .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  #box .row-fields-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  
+  #box .time-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  #box .time-group label {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+  
+  #box .postit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed rgba(0,0,0,0.1);
+  }
+  #box .btn {
+    flex: 1;
+    padding: 11px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  #box .btn-primary { background: #1a73e8; color: white; }
+  #box .btn-primary:hover { background: #1557b0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
+  #box .btn-secondary { background: #f3f4f6; color: #374151; }
+  #box .btn-secondary:hover { background: #e5e7eb; }
+  #box .btn-danger { background: #dc2626; color: white; }
+  #box .btn-danger:hover { background: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
+  #box .btn-link { background: transparent; color: #1a73e8; text-decoration: none; border: 1.5px solid #1a73e8; }
+  #box .btn-link:hover { background: #1a73e8; color: white; }
+  
+  #box .event-meta {
+    background: rgba(0,0,0,0.03);
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    color: #4b5563;
+  }
+  #box .event-meta strong { color: #111827; }
+  
+  #box .desc-display {
+    white-space: pre-wrap;
+    background: rgba(0,0,0,0.02);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    margin: 10px 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  #box.t .desc-display { border-left-color: var(--t); }
+  #box.f .desc-display { border-left-color: var(--f); }
+  
+  /* Scrollbar moderna */
+  #box::-webkit-scrollbar { width: 6px; }
+  #box::-webkit-scrollbar-track { background: transparent; }
+  #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -115,9 +282,8 @@
   </div>
 </header>
 
-<!-- Formulário de Criação de Eventos -->
 <div id="create-form">
-  <span class="lbl" style="font-weight:bold;">➕ Novo Evento:</span>
+  <span class="lbl" style="font-weight:bold;">➕ Novo Evento Rápido:</span>
   <select id="new-cal-id"></select>
   <input type="text" id="new-title" placeholder="Título do evento" style="flex:1; min-width: 150px;">
   <input type="datetime-local" id="new-start">
@@ -131,6 +297,7 @@
   <section class="panel t" id="pt"><div class="tag">TECNICA</div><div class="legend" id="lt"></div><div class="body" id="bt"></div></section>
 </main>
 
+<!-- Modal Post-it Moderno -->
 <div id="ov"><div id="box"></div></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -143,6 +310,7 @@
   let tokenClient;
   let gapiInited = false;
   let gisInited = false;
+  let currentEditEvent = null; // Evento sendo editado
 
   var CAL = {
     f: { name: "FUNCIONAL", sources: [
@@ -168,6 +336,14 @@
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
+
+  // Gera opções de hora (00-23) e minuto (00, 15, 30, 45)
+  function generateTimeOptions() {
+    const hours = [];
+    for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0'));
+    const minutes = ['00', '15', '30', '45'];
+    return { hours, minutes };
+  }
 
   function gapiLoaded() {
     gapi.load('client', initializeGapiClient);
@@ -200,7 +376,7 @@
           document.getElementById('logout-btn').style.display = 'inline-block';
           document.getElementById('create-form').style.display = 'flex';
           document.getElementById('auth-status').textContent = "✅ Conectado";
-          updateCalendarSelect(); // Atualiza o select baseado no filtro atual
+          updateCalendarSelect();
           load();
         },
       });
@@ -232,13 +408,10 @@
     }
   }
 
-  // Função para atualizar o select de agendas baseado no filtro atual
   function updateCalendarSelect() {
     const select = document.getElementById('new-cal-id');
-    select.innerHTML = ''; // Limpa todas as opções
-    
+    select.innerHTML = '';
     const show = state.show;
-    
     if (show === 'f' || show === 'ft') {
       CAL.f.sources.forEach(function(src) {
         const option = document.createElement('option');
@@ -247,7 +420,6 @@
         select.appendChild(option);
       });
     }
-    
     if (show === 't' || show === 'ft') {
       CAL.t.sources.forEach(function(src) {
         const option = document.createElement('option');
@@ -256,11 +428,7 @@
         select.appendChild(option);
       });
     }
-    
-    // Seleciona a primeira opção por padrão
-    if (select.options.length > 0) {
-      select.selectedIndex = 0;
-    }
+    if (select.options.length > 0) select.selectedIndex = 0;
   }
 
   function getRange() {
@@ -283,7 +451,7 @@
     var allDay = !!it.start.date, s, e;
     if (allDay) { var a = it.start.date.split("-"), b = it.end.date.split("-"); s = new Date(+a[0], a[1] - 1, +a[2]); e = new Date(+b[0], b[1] - 1, +b[2]); }
     else { s = new Date(it.start.dateTime); e = new Date(it.end.dateTime); }
-    return { id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, loc: it.location || "", desc: it.description || "", src: src };
+    return { id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, loc: it.location || "", desc: it.description || "", src: src, etag: it.etag };
   }
   
   function fetchSource(src, r) {
@@ -321,38 +489,381 @@
     var t = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
     return (new DOMParser().parseFromString(t, "text/html").body.textContent || "").trim();
   }
-  function closeModal() { document.getElementById("ov").classList.remove("show"); }
+  function closeModal() { 
+    document.getElementById("ov").classList.remove("show"); 
+    currentEditEvent = null;
+  }
   
   function openModal(key, build) {
     var box = document.getElementById("box");
-    box.className = key; box.textContent = "";
-    var x = el("button", "close", "Fechar"); x.onclick = closeModal; box.appendChild(x);
-    build(box);
+    box.className = key; 
+    box.textContent = "";
+    var header = document.createElement('div');
+    header.className = 'postit-header';
+    var x = document.createElement('button');
+    x.className = 'close';
+    x.innerHTML = '✕';
+    x.onclick = closeModal;
+    header.appendChild(x);
+    box.appendChild(header);
+    
+    var body = document.createElement('div');
+    body.className = 'postit-body';
+    box.appendChild(body);
+    
+    build(body, header);
     document.getElementById("ov").classList.add("show");
   }
   
+  // Modal de VISUALIZAÇÃO de evento existente (com botão editar)
   function openEvent(key, ev) {
-    openModal(key, function (box) {
-      box.appendChild(el("h2", null, ev.title));
-      box.appendChild(el("div", "meta", CAL[key].name + (many(key) ? " · " + ev.src.name : "")));
+    openModal(key, function (body, header) {
+      header.querySelector('h2')?.remove();
+      header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2');
+      h2.textContent = ev.title;
+      var subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = CAL[key].name + (many(key) ? " · " + ev.src.name : "");
+      header.insertBefore(subtitle, header.firstChild);
+      header.insertBefore(h2, header.firstChild);
+      
       var when;
       if (ev.allDay) {
         var last = addDays(ev.end, -1);
         when = same(ev.start, last) ? dayLabel(ev.start) + " (dia inteiro)" : dayLabel(ev.start) + " até " + dayLabel(last);
       } else if (same(ev.start, ev.end)) when = dayLabel(ev.start) + ", " + hhmm(ev.start) + " – " + hhmm(ev.end);
       else when = dayLabel(ev.start) + " " + hhmm(ev.start) + " → " + dayLabel(ev.end) + " " + hhmm(ev.end);
-      box.appendChild(el("div", "meta", when));
-      if (ev.loc) box.appendChild(el("div", "meta", "Local: " + ev.loc));
-      if (ev.desc) { var d = el("div", "desc"); linkify(d, plain(ev.desc)); box.appendChild(d); }
       
-      var editUrl = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`;
-      var btnEdit = el("a", "action-btn btn-edit", "✏️ Editar no Google Agenda");
-      btnEdit.href = editUrl; btnEdit.target = "_blank";
-      box.appendChild(btnEdit);
-
-      var btnDel = el("button", "action-btn btn-delete", "🗑️ Excluir este evento");
+      var meta = document.createElement('div');
+      meta.className = 'event-meta';
+      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : '');
+      body.appendChild(meta);
+      
+      if (ev.desc) { 
+        var d = document.createElement('div');
+        d.className = 'desc-display';
+        linkify(d, plain(ev.desc)); 
+        body.appendChild(d); 
+      }
+      
+      var actions = document.createElement('div');
+      actions.className = 'postit-actions';
+      
+      var btnEdit = document.createElement('button');
+      btnEdit.className = 'btn btn-primary';
+      btnEdit.innerHTML = '✏️ Editar';
+      btnEdit.onclick = function() { openEditModal(key, ev); };
+      actions.appendChild(btnEdit);
+      
+      var btnGcal = document.createElement('a');
+      btnGcal.className = 'btn btn-link';
+      btnGcal.innerHTML = '🔗 Google Agenda';
+      btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`;
+      btnGcal.target = "_blank";
+      actions.appendChild(btnGcal);
+      
+      var btnDel = document.createElement('button');
+      btnDel.className = 'btn btn-danger';
+      btnDel.innerHTML = '🗑️';
+      btnDel.title = 'Excluir';
       btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
-      box.appendChild(btnDel);
+      actions.appendChild(btnDel);
+      
+      body.appendChild(actions);
+    });
+  }
+
+  // Modal de EDIÇÃO/CRIAÇÃO estilo post-it
+  function openEditModal(key, ev) {
+    currentEditEvent = ev;
+    const isEdit = !!ev;
+    const calId = ev ? ev.src.id : getDefaultCalendarId(key);
+    const calName = ev ? (CAL[key].name + (many(key) ? " · " + ev.src.name : "")) : CAL[key].name;
+    const title = ev ? ev.title : '';
+    const desc = ev ? ev.desc : '';
+    const startDate = ev ? ev.start : new Date();
+    const endDate = ev ? ev.end : new Date(startDate.getTime() + 3600000);
+    
+    openModal(key, function (body, header) {
+      header.querySelector('h2')?.remove();
+      header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2');
+      h2.textContent = isEdit ? '✏️ Editar Evento' : '➕ Novo Evento';
+      var subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = calName;
+      header.insertBefore(subtitle, header.firstChild);
+      header.insertBefore(h2, header.firstChild);
+      
+      // Campo Título
+      var fieldTitle = document.createElement('div');
+      fieldTitle.className = 'field';
+      var lblTitle = document.createElement('label');
+      lblTitle.textContent = 'Título';
+      var inpTitle = document.createElement('input');
+      inpTitle.type = 'text';
+      inpTitle.id = 'edit-title';
+      inpTitle.value = title;
+      inpTitle.placeholder = 'Nome do evento';
+      fieldTitle.appendChild(lblTitle);
+      fieldTitle.appendChild(inpTitle);
+      body.appendChild(fieldTitle);
+      
+      // Seletor de agenda (só aparece se FUNCIONAL e não está editando)
+      if (key === 'f' && !isEdit && many(key)) {
+        var fieldCal = document.createElement('div');
+        fieldCal.className = 'field';
+        var lblCal = document.createElement('label');
+        lblCal.textContent = 'Tipo de Agenda';
+        var selCal = document.createElement('select');
+        selCal.id = 'edit-cal-id';
+        CAL.f.sources.forEach(function(src) {
+          var opt = document.createElement('option');
+          opt.value = src.id;
+          opt.textContent = src.name;
+          if (src.id === calId) opt.selected = true;
+          selCal.appendChild(opt);
+        });
+        fieldCal.appendChild(lblCal);
+        fieldCal.appendChild(selCal);
+        body.appendChild(fieldCal);
+      } else {
+        var hiddenCal = document.createElement('input');
+        hiddenCal.type = 'hidden';
+        hiddenCal.id = 'edit-cal-id';
+        hiddenCal.value = calId;
+        body.appendChild(hiddenCal);
+      }
+      
+      // Data Início
+      var fieldStart = document.createElement('div');
+      fieldStart.className = 'field';
+      var lblStart = document.createElement('label');
+      lblStart.textContent = 'Data de Início';
+      var inpStart = document.createElement('input');
+      inpStart.type = 'date';
+      inpStart.id = 'edit-start-date';
+      inpStart.value = startDate.toISOString().split('T')[0];
+      fieldStart.appendChild(lblStart);
+      fieldStart.appendChild(inpStart);
+      body.appendChild(fieldStart);
+      
+      // Hora Início (Horas + Minutos)
+      var fieldStartTime = document.createElement('div');
+      fieldStartTime.className = 'field';
+      var lblStartTime = document.createElement('label');
+      lblStartTime.textContent = 'Hora de Início';
+      var timeGroupStart = document.createElement('div');
+      timeGroupStart.className = 'time-group';
+      var times = generateTimeOptions();
+      
+      var divH = document.createElement('div');
+      var lblH = document.createElement('label');
+      lblH.textContent = 'Horas';
+      var selH = document.createElement('select');
+      selH.id = 'edit-start-hour';
+      times.hours.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h;
+        opt.textContent = h;
+        if (parseInt(h) === startDate.getHours()) opt.selected = true;
+        selH.appendChild(opt);
+      });
+      divH.appendChild(lblH);
+      divH.appendChild(selH);
+      
+      var divM = document.createElement('div');
+      var lblM = document.createElement('label');
+      lblM.textContent = 'Minutos';
+      var selM = document.createElement('select');
+      selM.id = 'edit-start-minute';
+      times.minutes.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (String(startDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
+        selM.appendChild(opt);
+      });
+      divM.appendChild(lblM);
+      divM.appendChild(selM);
+      
+      timeGroupStart.appendChild(divH);
+      timeGroupStart.appendChild(divM);
+      fieldStartTime.appendChild(lblStartTime);
+      fieldStartTime.appendChild(timeGroupStart);
+      body.appendChild(fieldStartTime);
+      
+      // Data Fim
+      var fieldEnd = document.createElement('div');
+      fieldEnd.className = 'field';
+      var lblEnd = document.createElement('label');
+      lblEnd.textContent = 'Data de Término';
+      var inpEnd = document.createElement('input');
+      inpEnd.type = 'date';
+      inpEnd.id = 'edit-end-date';
+      inpEnd.value = endDate.toISOString().split('T')[0];
+      fieldEnd.appendChild(lblEnd);
+      fieldEnd.appendChild(inpEnd);
+      body.appendChild(fieldEnd);
+      
+      // Hora Fim
+      var fieldEndTime = document.createElement('div');
+      fieldEndTime.className = 'field';
+      var lblEndTime = document.createElement('label');
+      lblEndTime.textContent = 'Hora de Término';
+      var timeGroupEnd = document.createElement('div');
+      timeGroupEnd.className = 'time-group';
+      
+      var divH2 = document.createElement('div');
+      var lblH2 = document.createElement('label');
+      lblH2.textContent = 'Horas';
+      var selH2 = document.createElement('select');
+      selH2.id = 'edit-end-hour';
+      times.hours.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h;
+        opt.textContent = h;
+        if (parseInt(h) === endDate.getHours()) opt.selected = true;
+        selH2.appendChild(opt);
+      });
+      divH2.appendChild(lblH2);
+      divH2.appendChild(selH2);
+      
+      var divM2 = document.createElement('div');
+      var lblM2 = document.createElement('label');
+      lblM2.textContent = 'Minutos';
+      var selM2 = document.createElement('select');
+      selM2.id = 'edit-end-minute';
+      times.minutes.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
+        selM2.appendChild(opt);
+      });
+      divM2.appendChild(lblM2);
+      divM2.appendChild(selM2);
+      
+      timeGroupEnd.appendChild(divH2);
+      timeGroupEnd.appendChild(divM2);
+      fieldEndTime.appendChild(lblEndTime);
+      fieldEndTime.appendChild(timeGroupEnd);
+      body.appendChild(fieldEndTime);
+      
+      // Descrição
+      var fieldDesc = document.createElement('div');
+      fieldDesc.className = 'field';
+      var lblDesc = document.createElement('label');
+      lblDesc.textContent = 'Descrição / Conteúdo';
+      var txtDesc = document.createElement('textarea');
+      txtDesc.id = 'edit-desc';
+      txtDesc.placeholder = 'Detalhes do evento...';
+      txtDesc.value = desc;
+      fieldDesc.appendChild(lblDesc);
+      fieldDesc.appendChild(txtDesc);
+      body.appendChild(fieldDesc);
+      
+      // Ações
+      var actions = document.createElement('div');
+      actions.className = 'postit-actions';
+      
+      var btnSave = document.createElement('button');
+      btnSave.className = 'btn btn-primary';
+      btnSave.innerHTML = isEdit ? '💾 Salvar Alterações' : '➕ Criar Evento';
+      btnSave.onclick = function() { saveEventFromModal(key); };
+      actions.appendChild(btnSave);
+      
+      var btnCancel = document.createElement('button');
+      btnCancel.className = 'btn btn-secondary';
+      btnCancel.textContent = 'Cancelar';
+      btnCancel.onclick = closeModal;
+      actions.appendChild(btnCancel);
+      
+      if (isEdit) {
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-danger';
+        btnDel.innerHTML = '🗑️ Excluir';
+        btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
+        actions.appendChild(btnDel);
+      }
+      
+      body.appendChild(actions);
+    });
+  }
+
+  // Modal de criação ao clicar em dia vazio
+  function openDayCreateModal(key, day) {
+    const fakeEv = {
+      src: { id: getDefaultCalendarId(key), name: key === 'f' ? 'Principal' : 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' },
+      start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0),
+      end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0),
+      title: '',
+      desc: '',
+      id: null
+    };
+    openEditModal(key, fakeEv);
+  }
+
+  function getDefaultCalendarId(key) {
+    if (key === 'f') {
+      if (state.show === 'f') return CAL.f.sources[0].id;
+      return CAL.f.sources[0].id;
+    }
+    return CAL.t.sources[0].id;
+  }
+
+  function saveEventFromModal(key) {
+    const calId = document.getElementById('edit-cal-id').value;
+    const title = document.getElementById('edit-title').value.trim();
+    const startDateStr = document.getElementById('edit-start-date').value;
+    const startHour = document.getElementById('edit-start-hour').value;
+    const startMinute = document.getElementById('edit-start-minute').value;
+    const endDateStr = document.getElementById('edit-end-date').value;
+    const endHour = document.getElementById('edit-end-hour').value;
+    const endMinute = document.getElementById('edit-end-minute').value;
+    const desc = document.getElementById('edit-desc').value;
+    
+    if (!title) { alert('Por favor, preencha o título do evento.'); return; }
+    if (!startDateStr || !endDateStr) { alert('Por favor, preencha as datas.'); return; }
+    
+    const startDateTime = new Date(`${startDateStr}T${startHour}:${startMinute}:00`);
+    const endDateTime = new Date(`${endDateStr}T${endHour}:${endMinute}:00`);
+    
+    if (endDateTime <= startDateTime) {
+      alert('A data/hora de término deve ser maior que a de início.');
+      return;
+    }
+    
+    const event = {
+      summary: title,
+      description: desc,
+      start: { dateTime: startDateTime.toISOString(), timeZone: 'America/Sao_Paulo' },
+      end: { dateTime: endDateTime.toISOString(), timeZone: 'America/Sao_Paulo' }
+    };
+    
+    const isEdit = currentEditEvent && currentEditEvent.id;
+    
+    let promise;
+    if (isEdit) {
+      promise = gapi.client.calendar.events.update({
+        calendarId: calId,
+        eventId: currentEditEvent.id,
+        resource: event
+      });
+    } else {
+      promise = gapi.client.calendar.events.insert({
+        calendarId: calId,
+        resource: event
+      });
+    }
+    
+    promise.then(function() {
+      alert(isEdit ? '✅ Evento atualizado com sucesso!' : '✅ Evento criado com sucesso!');
+      closeModal();
+      load();
+    }).catch(function(err) {
+      alert('Erro: ' + (err.result ? err.result.error.message : err.message));
     });
   }
 
@@ -398,25 +909,55 @@
       document.getElementById('new-desc').value = '';
       load();
     }).catch(function(err) {
-      alert("Erro ao criar evento. Verifique se você tem permissão de 'Fazer alterações' nesta agenda.\nDetalhe: " + (err.result ? err.result.error.message : err.message));
+      alert("Erro ao criar evento: " + (err.result ? err.result.error.message : err.message));
     });
   }
 
   function openDay(key, day, evs) {
-    openModal(key, function (box) {
-      box.appendChild(el("h2", null, dayLabel(day)));
-      box.appendChild(el("div", "meta", CAL[key].name));
-      evs.forEach(function (ev) {
-        var b = el("button", "item", (ev.allDay ? "Dia inteiro" : hhmm(ev.start)) + "  " + ev.title + (many(key) ? "  ·  " + ev.src.name : ""));
-        b.style.borderLeft = "5px solid " + ev.src.color;
-        b.onclick = function () { openEvent(key, ev); };
-        box.appendChild(b);
-      });
+    openModal(key, function (body, header) {
+      header.querySelector('h2')?.remove();
+      header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2');
+      h2.textContent = dayLabel(day);
+      var subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = CAL[key].name;
+      header.insertBefore(subtitle, header.firstChild);
+      header.insertBefore(h2, header.firstChild);
+      
+      if (evs.length === 0) {
+        var msg = document.createElement('div');
+        msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;';
+        msg.textContent = 'Nenhum evento neste dia.';
+        body.appendChild(msg);
+      } else {
+        evs.forEach(function (ev) {
+          var b = document.createElement('button');
+          b.className = 'item';
+          b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;';
+          b.style.borderLeft = "5px solid " + ev.src.color;
+          b.innerHTML = '<strong>' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; ' + ev.title + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : '');
+          b.onclick = function () { openEvent(key, ev); };
+          body.appendChild(b);
+        });
+      }
+      
+      var actions = document.createElement('div');
+      actions.className = 'postit-actions';
+      var btnNew = document.createElement('button');
+      btnNew.className = 'btn btn-primary';
+      btnNew.innerHTML = '➕ Novo Evento neste dia';
+      btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
+      actions.appendChild(btnNew);
+      body.appendChild(actions);
     });
   }
+  
   function chip(key, ev) {
     var b = el("button", "chip" + (ev.allDay ? "" : " timed"), (ev.allDay ? "" : hhmm(ev.start) + " ") + ev.title);
-    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); b.style.setProperty("--c", ev.src.color); b.onclick = function () { openEvent(key, ev); };
+    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); 
+    b.style.setProperty("--c", ev.src.color); 
+    b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
     return b;
   }
 
@@ -431,13 +972,24 @@
       list.slice(0, 3).forEach(function (ev) { c.appendChild(chip(key, ev)); });
       if (list.length > 3) {
         var m = el("button", "more", "+" + (list.length - 3) + " mais");
-        (function (dd, ll) { m.onclick = function () { openDay(key, dd, ll); }; })(d, list);
+        (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list);
         c.appendChild(m);
       }
+      // Clique no dia vazio abre modal de criação
+      (function(dd) {
+        c.onclick = function() {
+          if (list.length === 0) {
+            openDayCreateModal(key, dd);
+          } else {
+            openDay(key, dd, list);
+          }
+        };
+      })(d);
       g.appendChild(c);
     }
     body.appendChild(g);
   }
+  
   function renderWeek(body, key, evs) {
     var r = getRange(), w = el("div", "week"), i, d;
     for (i = 0; i < 7; i++) {
@@ -449,6 +1001,7 @@
     }
     body.appendChild(w);
   }
+  
   function renderList(body, key, evs) {
     var r = getRange(), box = el("div", "list"), i, d, any = false;
     for (i = 0; i < 30; i++) {
@@ -539,7 +1092,7 @@
   document.querySelectorAll("[data-show]").forEach(function (b) { 
     b.onclick = function () { 
       state.show = b.dataset.show; 
-      updateCalendarSelect(); // Atualiza o select quando muda o filtro
+      updateCalendarSelect();
       load(); 
     }; 
   });
