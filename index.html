@@ -70,6 +70,7 @@
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
 
+  /* ========== MODAL POST-IT ========== */
   #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -286,6 +287,191 @@
   #box::-webkit-scrollbar { width: 6px; }
   #box::-webkit-scrollbar-track { background: transparent; }
   #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+  /* ========== POPUP DE LEMBRETE (NOTIFICATION TOAST) ========== */
+  #reminder-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  
+  .reminder-toast {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+    padding: 0;
+    width: 340px;
+    max-width: 90vw;
+    pointer-events: auto;
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    border-left: 4px solid var(--accent);
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  
+  .reminder-toast.closing {
+    animation: slideOutRight 0.3s ease forwards;
+  }
+  
+  .reminder-header {
+    background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .reminder-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    animation: pulse 2s infinite;
+  }
+  
+  .reminder-title {
+    flex: 1;
+  }
+  
+  .reminder-title h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  
+  .reminder-title .time-badge {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    margin-top: 2px;
+    display: block;
+  }
+  
+  .reminder-body {
+    padding: 14px 16px;
+  }
+  
+  .reminder-event-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+  }
+  
+  .reminder-event-time {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .reminder-event-desc {
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.4;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .reminder-actions {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px 14px;
+    border-top: 1px solid #f3f4f6;
+    background: #fafbfc;
+  }
+  
+  .reminder-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: inherit;
+  }
+  
+  .reminder-btn-now {
+    background: #10b981;
+    color: white;
+  }
+  .reminder-btn-now:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16,185,129,0.3);
+  }
+  
+  .reminder-btn-snooze {
+    background: #f59e0b;
+    color: white;
+  }
+  .reminder-btn-snooze:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(245,158,11,0.3);
+  }
+  
+  .reminder-btn-edit {
+    background: #6366f1;
+    color: white;
+  }
+  .reminder-btn-edit:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99,102,241,0.3);
+  }
+  
+  .reminder-progress {
+    height: 3px;
+    background: #e5e7eb;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .reminder-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #1a73e8, #1557b0);
+    width: 100%;
+    animation: progressShrink 5s linear forwards;
+  }
+  
+  @keyframes progressShrink {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
 </style>
 </head>
 <body>
@@ -300,7 +486,7 @@
   
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
 
@@ -325,6 +511,9 @@
 
 <div id="ov"><div id="box"></div></div>
 
+<!-- Container de lembretes -->
+<div id="reminder-container"></div>
+
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
@@ -334,6 +523,7 @@
   let gisInited = false;
   let currentEditEvent = null;
   let isUserLoggedIn = false;
+  let reminderCheckInterval = null;
 
   const COLOR_MAP = {
     'green':  { colorId: '10', hex: '#0b8043', name: 'Verde' },
@@ -341,6 +531,9 @@
     'blue':   { colorId: '9',  hex: '#1a73e8', name: 'Azul' },
     'orange': { colorId: '6',  hex: '#e8710a', name: 'Laranja' }
   };
+
+  // Estado dos lembretes (em memória - reseta ao fechar o navegador)
+  const reminderState = {};
 
   var CAL = {
     f: { name: "FUNCIONAL", sources: [
@@ -442,6 +635,7 @@
     document.getElementById('logout-btn').style.display = 'inline-block';
     document.getElementById('auth-status').textContent = "✅ Conectado";
     load();
+    startReminderCheck();
   }
 
   function handleAuthClick() { tokenClient.requestAccessToken({prompt: 'consent'}); }
@@ -454,13 +648,149 @@
       google.accounts.oauth2.revoke(token.access_token, () => {
         gapi.client.setToken(null);
         isUserLoggedIn = false;
+        stopReminderCheck();
         location.reload();
       });
     } else {
       isUserLoggedIn = false;
+      stopReminderCheck();
       location.reload();
     }
   }
+
+  // ========== SISTEMA DE LEMBRETES ==========
+  
+  function startReminderCheck() {
+    stopReminderCheck();
+    checkUpcomingEvents();
+    reminderCheckInterval = setInterval(checkUpcomingEvents, 30000); // Verifica a cada 30 segundos
+  }
+  
+  function stopReminderCheck() {
+    if (reminderCheckInterval) {
+      clearInterval(reminderCheckInterval);
+      reminderCheckInterval = null;
+    }
+  }
+  
+  function checkUpcomingEvents() {
+    if (!state.data.f && !state.data.t) return;
+    
+    const now = new Date();
+    const allEvents = [...(state.data.f || []), ...(state.data.t || [])];
+    
+    allEvents.forEach(function(ev) {
+      if (!ev.id || ev.allDay) return; // Ignora eventos sem id ou dia inteiro
+      
+      const eventId = ev.id;
+      const eventStart = ev.start.getTime();
+      const minutesUntil = (eventStart - now.getTime()) / 60000;
+      
+      // Inicializa estado do lembrete se não existir
+      if (!reminderState[eventId]) {
+        reminderState[eventId] = {
+          shown: false,
+          snoozeCount: 0,
+          nextReminder: 15 // Primeiro lembrete aos 15 minutos
+        };
+      }
+      
+      const rs = reminderState[eventId];
+      
+      // Verifica se deve mostrar o lembrete
+      if (minutesUntil <= rs.nextReminder && minutesUntil > 0 && !rs.shown) {
+        showReminderToast(ev, rs);
+        rs.shown = true;
+      }
+    });
+  }
+  
+  function showReminderToast(ev, rs) {
+    const container = document.getElementById('reminder-container');
+    const toast = document.createElement('div');
+    toast.className = 'reminder-toast';
+    toast.style.borderLeftColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '#1a73e8';
+    
+    const minutesUntil = Math.round((ev.start.getTime() - new Date().getTime()) / 60000);
+    const timeText = minutesUntil >= 60 ? 
+      `Em ${Math.floor(minutesUntil/60)}h ${minutesUntil%60}min` : 
+      `Em ${minutesUntil} minutos`;
+    
+    toast.innerHTML = `
+      <div class="reminder-header">
+        <div class="reminder-icon">⏰</div>
+        <div class="reminder-title">
+          <h4>Lembrete de Evento</h4>
+          <span class="time-badge">${timeText}</span>
+        </div>
+      </div>
+      <div class="reminder-body">
+        <h3 class="reminder-event-title">${ev.title}</h3>
+        <p class="reminder-event-time">🕐 ${hhmm(ev.start)} - ${hhmm(ev.end)}</p>
+        ${ev.desc ? `<p class="reminder-event-desc">${ev.desc.substring(0, 100)}${ev.desc.length > 100 ? '...' : ''}</p>` : ''}
+      </div>
+      <div class="reminder-actions">
+        <button class="reminder-btn reminder-btn-now" data-action="now">
+          ▶️ Agora
+        </button>
+        <button class="reminder-btn reminder-btn-snooze" data-action="snooze">
+          ⏱️ +5min
+        </button>
+        <button class="reminder-btn reminder-btn-edit" data-action="edit">
+          ️ Prorrogar
+        </button>
+      </div>
+      <div class="reminder-progress">
+        <div class="reminder-progress-bar"></div>
+      </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto-fechar após 5 segundos
+    const autoCloseTimer = setTimeout(() => {
+      closeReminderToast(toast, ev, rs);
+    }, 5000);
+    
+    // Botões de ação
+    toast.querySelector('[data-action="now"]').onclick = function() {
+      clearTimeout(autoCloseTimer);
+      rs.shown = true; // Não mostra mais
+      closeReminderToast(toast, ev, rs);
+    };
+    
+    toast.querySelector('[data-action="snooze"]').onclick = function() {
+      clearTimeout(autoCloseTimer);
+      rs.snoozeCount++;
+      rs.shown = false; // Permite mostrar novamente
+      
+      if (rs.snoozeCount === 1) {
+        rs.nextReminder = 10; // Próximo em 10 minutos
+      } else if (rs.snoozeCount >= 2) {
+        rs.nextReminder = 5; // Último em 5 minutos
+      }
+      
+      closeReminderToast(toast, ev, rs);
+    };
+    
+    toast.querySelector('[data-action="edit"]').onclick = function() {
+      clearTimeout(autoCloseTimer);
+      closeReminderToast(toast, ev, rs);
+      // Abre o modal de edição
+      openEditModal(ev.src.name === 'Principal' && ev.src.id === CAL.t.sources[0].id ? 't' : 'f', ev);
+    };
+  }
+  
+  function closeReminderToast(toast, ev, rs) {
+    toast.classList.add('closing');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }
+
+  // ========== RESTO DO CÓDIGO ==========
 
   function getRange() {
     var c = state.cursor, s;
@@ -611,7 +941,6 @@
 
   function openEditModal(key, ev) {
     currentEditEvent = ev;
-    // ✅ CORREÇÃO: verifica se tem id real (não apenas se é objeto)
     const isEdit = ev && ev.id;
     const calId = ev ? ev.src.id : getDefaultCalendarId(key);
     const calName = ev ? (CAL[key].name + (many(key) ? " · " + ev.src.name : "")) : CAL[key].name;
@@ -670,7 +999,6 @@
         body.appendChild(hiddenCal);
       }
       
-      // ✅ CORREÇÃO: seletor de cor aparece quando é TECNICA e NÃO está editando
       if (key === 't' && !isEdit) {
         var fieldColor = document.createElement('div');
         fieldColor.className = 'field';
@@ -963,7 +1291,7 @@
       actions.className = 'postit-actions';
       var btnNew = document.createElement('button');
       btnNew.className = 'btn btn-primary';
-      btnNew.innerHTML = ' Novo Evento neste dia';
+      btnNew.innerHTML = '➕ Novo Evento neste dia';
       btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
       actions.appendChild(btnNew);
       body.appendChild(actions);
