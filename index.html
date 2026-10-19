@@ -58,17 +58,19 @@
   .srcname { color:var(--muted); font-size:.8rem; margin-left:6px; }
   .more { background:none; border:0; color:var(--muted); font-size:.72rem; padding:1px 5px; cursor:pointer; }
   .week { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); min-height:100%; }
-  .week .col { border-right:1px solid var(--line); padding:4px; min-width:0; }
+  .week .col { border-right:1px solid var(--line); padding:4px; min-width:0; cursor: pointer; transition: background 0.2s; }
+  .week .col:hover { background: rgba(26, 115, 232, 0.05); }
   .week .col:last-child { border-right:0; }
   .week .col.today { background:var(--today); }
   .week .hd { font-size:.75rem; color:var(--muted); text-align:center; padding-bottom:4px; text-transform:uppercase; }
-  .list .day { padding:8px 12px; border-bottom:1px solid var(--line); }
+  .list .day { padding:8px 12px; border-bottom:1px solid var(--line); cursor: pointer; transition: background 0.2s; }
+  .list .day:hover { background: rgba(26, 115, 232, 0.05); }
   .list .dh { font-weight:600; margin-bottom:4px; text-transform:capitalize; }
   .list .row { display:flex; gap:10px; width:100%; text-align:left; border:0; border-radius:6px; padding:5px 6px; background:none; font-size:.88rem; }
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
 
-  /* ========== MODAL POST-IT MODERNO ========== */
+  /* ========== MODAL POST-IT COMPACTO ========== */
   #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -78,24 +80,19 @@
     background: #fffef7; 
     color: #1f2937; 
     border-radius: 4px; 
-    max-width: 440px; 
+    max-width: 420px; 
     width: 100%; 
     max-height: 90vh; 
     overflow-y: auto; 
     padding: 0;
-    box-shadow: 
-      0 20px 60px rgba(0,0,0,0.3),
-      0 0 0 1px rgba(0,0,0,0.05),
-      inset 0 1px 0 rgba(255,255,255,0.8);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05);
     animation: slideUp 0.25s ease;
     position: relative;
   }
   #box::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 6px;
     background: var(--accent);
     border-radius: 4px 4px 0 0;
@@ -104,7 +101,7 @@
   #box.f::before { background: var(--f); }
   
   #box .postit-header {
-    padding: 20px 24px 12px;
+    padding: 16px 20px 10px;
     border-bottom: 1px dashed rgba(0,0,0,0.1);
     display: flex;
     justify-content: space-between;
@@ -112,44 +109,42 @@
   }
   #box .postit-header h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #111827;
     flex: 1;
   }
   #box .postit-header .subtitle {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--muted);
-    margin-top: 4px;
+    margin-top: 3px;
     font-weight: 500;
   }
   #box .close {
     background: rgba(0,0,0,0.06);
     border: none;
-    width: 28px;
-    height: 28px;
+    width: 26px; height: 26px;
     border-radius: 50%;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #6b7280;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     flex-shrink: 0;
   }
   #box .close:hover { background: rgba(0,0,0,0.12); color: #111827; }
   
-  #box .postit-body { padding: 16px 24px 24px; }
+  #box .postit-body { padding: 14px 20px 20px; }
   
-  #box .field { margin-bottom: 14px; }
+  #box .field { margin-bottom: 12px; }
   #box .field label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -157,10 +152,10 @@
   #box .field select,
   #box .field textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
     font-family: inherit;
     background: #fff;
     color: #111827;
@@ -173,32 +168,84 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
   }
-  #box .field textarea { min-height: 80px; resize: vertical; }
+  #box .field textarea { min-height: 70px; resize: vertical; }
   
-  #box .time-group {
+  /* Linha compacta: Data + Hora lado a lado */
+  #box .datetime-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    margin-bottom: 12px;
   }
-  #box .time-group label {
-    font-size: 0.7rem;
+  #box .datetime-row .field { margin-bottom: 0; }
+  #box .datetime-row .field input,
+  #box .datetime-row .field select {
+    padding: 7px 8px;
+    font-size: 0.85rem;
+  }
+  #box .time-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  #box .time-pair label {
+    font-size: 0.65rem;
     color: #6b7280;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
+  #box .time-pair select {
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+  
+  /* Seletor de cor */
+  #box .color-selector {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  #box .color-option {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  #box .color-option:hover { transform: scale(1.1); }
+  #box .color-option.selected {
+    border-color: #111827;
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  #box .color-option.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  #box .color-green { background: #0b8043; }
+  #box .color-red { background: #d93025; }
+  #box .color-blue { background: #1a73e8; }
+  #box .color-orange { background: #e8710a; }
   
   #box .postit-actions {
     display: flex;
     gap: 8px;
-    margin-top: 18px;
-    padding-top: 16px;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 1px dashed rgba(0,0,0,0.1);
   }
   #box .btn {
     flex: 1;
-    padding: 11px 16px;
+    padding: 10px 14px;
     border: none;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
@@ -256,7 +303,7 @@
   
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
 
@@ -279,7 +326,6 @@
   <section class="panel t" id="pt"><div class="tag">TECNICA</div><div class="legend" id="lt"></div><div class="body" id="bt"></div></section>
 </main>
 
-<!-- Modal Post-it Moderno -->
 <div id="ov"><div id="box"></div></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -294,6 +340,14 @@
   let gisInited = false;
   let currentEditEvent = null;
   let isUserLoggedIn = false;
+
+  // Mapeamento de cores para TECNICA (colorId do Google Calendar)
+  const COLOR_MAP = {
+    'green':  { colorId: '10', hex: '#0b8043', name: 'Verde' },
+    'red':    { colorId: '11', hex: '#d93025', name: 'Vermelho' },
+    'blue':   { colorId: '9',  hex: '#1a73e8', name: 'Azul' },
+    'orange': { colorId: '6',  hex: '#e8710a', name: 'Laranja' }
+  };
 
   var CAL = {
     f: { name: "FUNCIONAL", sources: [
@@ -327,14 +381,10 @@
     return { hours, minutes };
   }
 
-  function gapiLoaded() {
-    gapi.load('client', initializeGapiClient);
-  }
+  function gapiLoaded() { gapi.load('client', initializeGapiClient); }
   async function initializeGapiClient() {
     try {
-      await gapi.client.init({
-        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
-      });
+      await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] });
       gapiInited = true;
       maybeEnableButtons();
       checkSavedSession();
@@ -350,15 +400,9 @@
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: (resp) => {
-          if (resp.error) {
-            console.error(resp);
-            alert("Erro no login: " + resp.error);
-            return;
-          }
-          // Salvar token na sessionStorage para persistir durante F5
+          if (resp.error) { alert("Erro no login: " + resp.error); return; }
           sessionStorage.setItem('gcal_access_token', resp.access_token);
           sessionStorage.setItem('gcal_token_expiry', Date.now() + (resp.expires_in * 1000));
-          
           onLoginSuccess();
         },
       });
@@ -374,38 +418,26 @@
   function maybeEnableButtons() {
     if (gapiInited && gisInited) {
       document.getElementById('auth-status').style.display = 'none';
-      // Só mostra o botão de login se NÃO estiver logado
-      if (!isUserLoggedIn) {
-        document.getElementById('login-btn').style.display = 'inline-block';
-      }
+      if (!isUserLoggedIn) document.getElementById('login-btn').style.display = 'inline-block';
     }
   }
 
-  // Verifica se existe token salvo na sessionStorage (persiste durante F5)
   function checkSavedSession() {
     if (!gapiInited || !gisInited) return;
-    
     const savedToken = sessionStorage.getItem('gcal_access_token');
     const savedExpiry = sessionStorage.getItem('gcal_token_expiry');
-    
     if (savedToken && savedExpiry) {
       const now = Date.now();
       const expiry = parseInt(savedExpiry);
-      
-      // Se o token ainda não expirou (com margem de 5 minutos)
       if (now < expiry - 300000) {
-        // Restaura o token no gapi
         gapi.client.setToken({ access_token: savedToken });
         onLoginSuccess();
         return;
       } else {
-        // Token expirado, limpa
         sessionStorage.removeItem('gcal_access_token');
         sessionStorage.removeItem('gcal_token_expiry');
       }
     }
-    
-    // Não há sessão válida, mostra botão de login
     document.getElementById('login-btn').style.display = 'inline-block';
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('auth-status').textContent = 'Faça login para acessar sua agenda.';
@@ -419,15 +451,11 @@
     load();
   }
 
-  function handleAuthClick() {
-    tokenClient.requestAccessToken({prompt: 'consent'});
-  }
+  function handleAuthClick() { tokenClient.requestAccessToken({prompt: 'consent'}); }
 
   function handleSignoutClick() {
-    // Limpa a sessionStorage (sessão será perdida)
     sessionStorage.removeItem('gcal_access_token');
     sessionStorage.removeItem('gcal_token_expiry');
-    
     const token = gapi.client.getToken();
     if (token && token.access_token) {
       google.accounts.oauth2.revoke(token.access_token, () => {
@@ -461,23 +489,37 @@
     var allDay = !!it.start.date, s, e;
     if (allDay) { var a = it.start.date.split("-"), b = it.end.date.split("-"); s = new Date(+a[0], a[1] - 1, +a[2]); e = new Date(+b[0], b[1] - 1, +b[2]); }
     else { s = new Date(it.start.dateTime); e = new Date(it.end.dateTime); }
-    return { id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, loc: it.location || "", desc: it.description || "", src: src, etag: it.etag };
+    // Extrai cor customizada da descrição (tag [COLOR:xxx])
+    var customColor = null;
+    var desc = it.description || "";
+    var colorMatch = desc.match(/\[COLOR:(\w+)\]/);
+    if (colorMatch) {
+      customColor = colorMatch[1];
+      desc = desc.replace(/\[COLOR:\w+\]\s*/, '').trim();
+    }
+    return { 
+      id: it.id, 
+      title: it.summary || "(sem título)", 
+      allDay: allDay, 
+      start: s, 
+      end: e, 
+      loc: it.location || "", 
+      desc: desc, 
+      src: src, 
+      etag: it.etag,
+      colorId: it.colorId,
+      customColor: customColor
+    };
   }
   
   function fetchSource(src, r) {
     return gapi.client.calendar.events.list({
-      calendarId: src.id,
-      timeMin: r.start.toISOString(),
-      timeMax: r.end.toISOString(),
-      singleEvents: true,
-      orderBy: 'startTime',
-      maxResults: 2500
+      calendarId: src.id, timeMin: r.start.toISOString(), timeMax: r.end.toISOString(),
+      singleEvents: true, orderBy: 'startTime', maxResults: 2500
     }).then(function(response) {
       return (response.result.items || []).filter(function(i) { 
         return i.status !== 'cancelled' && i.start && i.end; 
-      }).map(function(i) { 
-        return norm(i, src); 
-      });
+      }).map(function(i) { return norm(i, src); });
     }).catch(function(err) {
       throw new Error(err.result ? err.result.error.message : err.message);
     });
@@ -516,11 +558,9 @@
     x.onclick = closeModal;
     header.appendChild(x);
     box.appendChild(header);
-    
     var body = document.createElement('div');
     body.className = 'postit-body';
     box.appendChild(body);
-    
     build(body, header);
     document.getElementById("ov").classList.add("show");
   }
@@ -531,6 +571,10 @@
       header.querySelector('.subtitle')?.remove();
       var h2 = document.createElement('h2');
       h2.textContent = ev.title;
+      // Aplica cor customizada no título se existir
+      if (ev.customColor && COLOR_MAP[ev.customColor]) {
+        h2.style.color = COLOR_MAP[ev.customColor].hex;
+      }
       var subtitle = document.createElement('div');
       subtitle.className = 'subtitle';
       subtitle.textContent = CAL[key].name + (many(key) ? " · " + ev.src.name : "");
@@ -546,7 +590,7 @@
       
       var meta = document.createElement('div');
       meta.className = 'event-meta';
-      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br> ' + ev.loc : '');
+      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : '');
       body.appendChild(meta);
       
       if (ev.desc) { 
@@ -567,7 +611,7 @@
       
       var btnGcal = document.createElement('a');
       btnGcal.className = 'btn btn-link';
-      btnGcal.innerHTML = ' Google Agenda';
+      btnGcal.innerHTML = '🔗 Google Agenda';
       btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`;
       btnGcal.target = "_blank";
       actions.appendChild(btnGcal);
@@ -592,18 +636,20 @@
     const desc = ev ? ev.desc : '';
     const startDate = ev ? ev.start : new Date();
     const endDate = ev ? ev.end : new Date(startDate.getTime() + 3600000);
+    const customColor = ev ? ev.customColor : null;
     
     openModal(key, function (body, header) {
       header.querySelector('h2')?.remove();
       header.querySelector('.subtitle')?.remove();
       var h2 = document.createElement('h2');
-      h2.textContent = isEdit ? '️ Editar Evento' : '➕ Novo Evento';
+      h2.textContent = isEdit ? '✏️ Editar Evento' : '➕ Novo Evento';
       var subtitle = document.createElement('div');
       subtitle.className = 'subtitle';
       subtitle.textContent = calName;
       header.insertBefore(subtitle, header.firstChild);
       header.insertBefore(h2, header.firstChild);
       
+      // Título
       var fieldTitle = document.createElement('div');
       fieldTitle.className = 'field';
       var lblTitle = document.createElement('label');
@@ -617,6 +663,7 @@
       fieldTitle.appendChild(inpTitle);
       body.appendChild(fieldTitle);
       
+      // Seletor de agenda (FUNCIONAL)
       if (key === 'f' && !isEdit && many(key)) {
         var fieldCal = document.createElement('div');
         fieldCal.className = 'field';
@@ -642,429 +689,59 @@
         body.appendChild(hiddenCal);
       }
       
-      var fieldStart = document.createElement('div');
-      fieldStart.className = 'field';
-      var lblStart = document.createElement('label');
-      lblStart.textContent = 'Data de Início';
-      var inpStart = document.createElement('input');
-      inpStart.type = 'date';
-      inpStart.id = 'edit-start-date';
-      inpStart.value = startDate.toISOString().split('T')[0];
-      fieldStart.appendChild(lblStart);
-      fieldStart.appendChild(inpStart);
-      body.appendChild(fieldStart);
+      // Seletor de cor (TECNICA - apenas na criação)
+      if (key === 't' && !isEdit) {
+        var fieldColor = document.createElement('div');
+        fieldColor.className = 'field';
+        var lblColor = document.createElement('label');
+        lblColor.textContent = 'Cor do Evento';
+        fieldColor.appendChild(lblColor);
+        var colorSelector = document.createElement('div');
+        colorSelector.className = 'color-selector';
+        colorSelector.id = 'color-selector';
+        ['green', 'red', 'blue', 'orange'].forEach(function(colorKey) {
+          var colorDiv = document.createElement('div');
+          colorDiv.className = 'color-option color-' + colorKey + (customColor === colorKey ? ' selected' : '');
+          colorDiv.dataset.color = colorKey;
+          colorDiv.title = COLOR_MAP[colorKey].name;
+          colorDiv.onclick = function() {
+            document.querySelectorAll('.color-option').forEach(function(el) { el.classList.remove('selected'); });
+            colorDiv.classList.add('selected');
+          };
+          colorSelector.appendChild(colorDiv);
+        });
+        fieldColor.appendChild(colorSelector);
+        body.appendChild(fieldColor);
+      } else {
+        var hiddenColor = document.createElement('input');
+        hiddenColor.type = 'hidden';
+        hiddenColor.id = 'edit-color';
+        hiddenColor.value = customColor || '';
+        body.appendChild(hiddenColor);
+      }
+      
+      // Data e Hora de Início (linha compacta)
+      var dtStartRow = document.createElement('div');
+      dtStartRow.className = 'datetime-row';
+      
+      var fieldStartDate = document.createElement('div');
+      fieldStartDate.className = 'field';
+      var lblStartDate = document.createElement('label');
+      lblStartDate.textContent = 'Data de Início';
+      var inpStartDate = document.createElement('input');
+      inpStartDate.type = 'date';
+      inpStartDate.id = 'edit-start-date';
+      inpStartDate.value = startDate.toISOString().split('T')[0];
+      fieldStartDate.appendChild(lblStartDate);
+      fieldStartDate.appendChild(inpStartDate);
+      dtStartRow.appendChild(fieldStartDate);
       
       var fieldStartTime = document.createElement('div');
       fieldStartTime.className = 'field';
       var lblStartTime = document.createElement('label');
       lblStartTime.textContent = 'Hora de Início';
-      var timeGroupStart = document.createElement('div');
-      timeGroupStart.className = 'time-group';
+      var timePairStart = document.createElement('div');
+      timePairStart.className = 'time-pair';
       var times = generateTimeOptions();
       
-      var divH = document.createElement('div');
-      var lblH = document.createElement('label');
-      lblH.textContent = 'Horas';
-      var selH = document.createElement('select');
-      selH.id = 'edit-start-hour';
-      times.hours.forEach(function(h) {
-        var opt = document.createElement('option');
-        opt.value = h;
-        opt.textContent = h;
-        if (parseInt(h) === startDate.getHours()) opt.selected = true;
-        selH.appendChild(opt);
-      });
-      divH.appendChild(lblH);
-      divH.appendChild(selH);
-      
-      var divM = document.createElement('div');
-      var lblM = document.createElement('label');
-      lblM.textContent = 'Minutos';
-      var selM = document.createElement('select');
-      selM.id = 'edit-start-minute';
-      times.minutes.forEach(function(m) {
-        var opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        if (String(startDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
-        selM.appendChild(opt);
-      });
-      divM.appendChild(lblM);
-      divM.appendChild(selM);
-      
-      timeGroupStart.appendChild(divH);
-      timeGroupStart.appendChild(divM);
-      fieldStartTime.appendChild(lblStartTime);
-      fieldStartTime.appendChild(timeGroupStart);
-      body.appendChild(fieldStartTime);
-      
-      var fieldEnd = document.createElement('div');
-      fieldEnd.className = 'field';
-      var lblEnd = document.createElement('label');
-      lblEnd.textContent = 'Data de Término';
-      var inpEnd = document.createElement('input');
-      inpEnd.type = 'date';
-      inpEnd.id = 'edit-end-date';
-      inpEnd.value = endDate.toISOString().split('T')[0];
-      fieldEnd.appendChild(lblEnd);
-      fieldEnd.appendChild(inpEnd);
-      body.appendChild(fieldEnd);
-      
-      var fieldEndTime = document.createElement('div');
-      fieldEndTime.className = 'field';
-      var lblEndTime = document.createElement('label');
-      lblEndTime.textContent = 'Hora de Término';
-      var timeGroupEnd = document.createElement('div');
-      timeGroupEnd.className = 'time-group';
-      
-      var divH2 = document.createElement('div');
-      var lblH2 = document.createElement('label');
-      lblH2.textContent = 'Horas';
-      var selH2 = document.createElement('select');
-      selH2.id = 'edit-end-hour';
-      times.hours.forEach(function(h) {
-        var opt = document.createElement('option');
-        opt.value = h;
-        opt.textContent = h;
-        if (parseInt(h) === endDate.getHours()) opt.selected = true;
-        selH2.appendChild(opt);
-      });
-      divH2.appendChild(lblH2);
-      divH2.appendChild(selH2);
-      
-      var divM2 = document.createElement('div');
-      var lblM2 = document.createElement('label');
-      lblM2.textContent = 'Minutos';
-      var selM2 = document.createElement('select');
-      selM2.id = 'edit-end-minute';
-      times.minutes.forEach(function(m) {
-        var opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
-        selM2.appendChild(opt);
-      });
-      divM2.appendChild(lblM2);
-      divM2.appendChild(selM2);
-      
-      timeGroupEnd.appendChild(divH2);
-      timeGroupEnd.appendChild(divM2);
-      fieldEndTime.appendChild(lblEndTime);
-      fieldEndTime.appendChild(timeGroupEnd);
-      body.appendChild(fieldEndTime);
-      
-      var fieldDesc = document.createElement('div');
-      fieldDesc.className = 'field';
-      var lblDesc = document.createElement('label');
-      lblDesc.textContent = 'Descrição / Conteúdo';
-      var txtDesc = document.createElement('textarea');
-      txtDesc.id = 'edit-desc';
-      txtDesc.placeholder = 'Detalhes do evento...';
-      txtDesc.value = desc;
-      fieldDesc.appendChild(lblDesc);
-      fieldDesc.appendChild(txtDesc);
-      body.appendChild(fieldDesc);
-      
-      var actions = document.createElement('div');
-      actions.className = 'postit-actions';
-      
-      var btnSave = document.createElement('button');
-      btnSave.className = 'btn btn-primary';
-      btnSave.innerHTML = isEdit ? '💾 Salvar Alterações' : '➕ Criar Evento';
-      btnSave.onclick = function() { saveEventFromModal(key); };
-      actions.appendChild(btnSave);
-      
-      var btnCancel = document.createElement('button');
-      btnCancel.className = 'btn btn-secondary';
-      btnCancel.textContent = 'Cancelar';
-      btnCancel.onclick = closeModal;
-      actions.appendChild(btnCancel);
-      
-      if (isEdit) {
-        var btnDel = document.createElement('button');
-        btnDel.className = 'btn btn-danger';
-        btnDel.innerHTML = '🗑️ Excluir';
-        btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
-        actions.appendChild(btnDel);
-      }
-      
-      body.appendChild(actions);
-    });
-  }
-
-  function openDayCreateModal(key, day) {
-    const fakeEv = {
-      src: { id: getDefaultCalendarId(key), name: key === 'f' ? 'Principal' : 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' },
-      start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0),
-      end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0),
-      title: '',
-      desc: '',
-      id: null
-    };
-    openEditModal(key, fakeEv);
-  }
-
-  function getDefaultCalendarId(key) {
-    if (key === 'f') return CAL.f.sources[0].id;
-    return CAL.t.sources[0].id;
-  }
-
-  function saveEventFromModal(key) {
-    const calId = document.getElementById('edit-cal-id').value;
-    const title = document.getElementById('edit-title').value.trim();
-    const startDateStr = document.getElementById('edit-start-date').value;
-    const startHour = document.getElementById('edit-start-hour').value;
-    const startMinute = document.getElementById('edit-start-minute').value;
-    const endDateStr = document.getElementById('edit-end-date').value;
-    const endHour = document.getElementById('edit-end-hour').value;
-    const endMinute = document.getElementById('edit-end-minute').value;
-    const desc = document.getElementById('edit-desc').value;
-    
-    if (!title) { alert('Por favor, preencha o título do evento.'); return; }
-    if (!startDateStr || !endDateStr) { alert('Por favor, preencha as datas.'); return; }
-    
-    const startDateTime = new Date(`${startDateStr}T${startHour}:${startMinute}:00`);
-    const endDateTime = new Date(`${endDateStr}T${endHour}:${endMinute}:00`);
-    
-    if (endDateTime <= startDateTime) {
-      alert('A data/hora de término deve ser maior que a de início.');
-      return;
-    }
-    
-    const event = {
-      summary: title,
-      description: desc,
-      start: { dateTime: startDateTime.toISOString(), timeZone: 'America/Sao_Paulo' },
-      end: { dateTime: endDateTime.toISOString(), timeZone: 'America/Sao_Paulo' }
-    };
-    
-    const isEdit = currentEditEvent && currentEditEvent.id;
-    
-    let promise;
-    if (isEdit) {
-      promise = gapi.client.calendar.events.update({
-        calendarId: calId,
-        eventId: currentEditEvent.id,
-        resource: event
-      });
-    } else {
-      promise = gapi.client.calendar.events.insert({
-        calendarId: calId,
-        resource: event
-      });
-    }
-    
-    promise.then(function() {
-      alert(isEdit ? '✅ Evento atualizado com sucesso!' : '✅ Evento criado com sucesso!');
-      closeModal();
-      load();
-    }).catch(function(err) {
-      alert('Erro: ' + (err.result ? err.result.error.message : err.message));
-    });
-  }
-
-  function deleteEvent(calendarId, eventId) {
-    if (!confirm("Tem certeza que deseja EXCLUIR este evento permanentemente?")) return;
-    gapi.client.calendar.events.delete({
-      calendarId: calendarId,
-      eventId: eventId
-    }).then(function() {
-      alert("Evento excluído com sucesso!");
-      closeModal();
-      load();
-    }).catch(function(err) {
-      alert("Erro ao excluir: " + (err.result ? err.result.error.message : err.message));
-    });
-  }
-
-  function openDay(key, day, evs) {
-    openModal(key, function (body, header) {
-      header.querySelector('h2')?.remove();
-      header.querySelector('.subtitle')?.remove();
-      var h2 = document.createElement('h2');
-      h2.textContent = dayLabel(day);
-      var subtitle = document.createElement('div');
-      subtitle.className = 'subtitle';
-      subtitle.textContent = CAL[key].name;
-      header.insertBefore(subtitle, header.firstChild);
-      header.insertBefore(h2, header.firstChild);
-      
-      if (evs.length === 0) {
-        var msg = document.createElement('div');
-        msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;';
-        msg.textContent = 'Nenhum evento neste dia.';
-        body.appendChild(msg);
-      } else {
-        evs.forEach(function (ev) {
-          var b = document.createElement('button');
-          b.className = 'item';
-          b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;';
-          b.style.borderLeft = "5px solid " + ev.src.color;
-          b.innerHTML = '<strong>' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; ' + ev.title + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : '');
-          b.onclick = function () { openEvent(key, ev); };
-          body.appendChild(b);
-        });
-      }
-      
-      var actions = document.createElement('div');
-      actions.className = 'postit-actions';
-      var btnNew = document.createElement('button');
-      btnNew.className = 'btn btn-primary';
-      btnNew.innerHTML = '➕ Novo Evento neste dia';
-      btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
-      actions.appendChild(btnNew);
-      body.appendChild(actions);
-    });
-  }
-  
-  function chip(key, ev) {
-    var b = el("button", "chip" + (ev.allDay ? "" : " timed"), (ev.allDay ? "" : hhmm(ev.start) + " ") + ev.title);
-    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); 
-    b.style.setProperty("--c", ev.src.color); 
-    b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
-    return b;
-  }
-
-  function renderMonth(body, key, evs) {
-    var r = getRange(), g = el("div", "grid"), i, d;
-    ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].forEach(function (n) { g.appendChild(el("div", "dow", n)); });
-    for (i = 0; i < 42; i++) {
-      d = addDays(r.start, i);
-      var c = el("div", "cell" + (d.getMonth() !== state.cursor.getMonth() ? " other" : "") + (same(d, new Date()) ? " today" : ""));
-      c.appendChild(el("div", "num", d.getDate()));
-      var list = onDay(evs, d);
-      list.slice(0, 3).forEach(function (ev) { c.appendChild(chip(key, ev)); });
-      if (list.length > 3) {
-        var m = el("button", "more", "+" + (list.length - 3) + " mais");
-        (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list);
-        c.appendChild(m);
-      }
-      (function(dd) {
-        c.onclick = function() {
-          if (list.length === 0) {
-            openDayCreateModal(key, dd);
-          } else {
-            openDay(key, dd, list);
-          }
-        };
-      })(d);
-      g.appendChild(c);
-    }
-    body.appendChild(g);
-  }
-  
-  function renderWeek(body, key, evs) {
-    var r = getRange(), w = el("div", "week"), i, d;
-    for (i = 0; i < 7; i++) {
-      d = addDays(r.start, i);
-      var col = el("div", "col" + (same(d, new Date()) ? " today" : ""));
-      col.appendChild(el("div", "hd", d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" })));
-      onDay(evs, d).forEach(function (ev) { col.appendChild(chip(key, ev)); });
-      w.appendChild(col);
-    }
-    body.appendChild(w);
-  }
-  
-  function renderList(body, key, evs) {
-    var r = getRange(), box = el("div", "list"), i, d, any = false;
-    for (i = 0; i < 30; i++) {
-      d = addDays(r.start, i);
-      var l = onDay(evs, d);
-      if (!l.length) continue;
-      any = true;
-      var day = el("div", "day");
-      day.appendChild(el("div", "dh", dayLabel(d)));
-      l.forEach(function (ev) {
-        var row = el("button", "row");
-        row.appendChild(el("span", "hr", ev.allDay ? "Dia inteiro" : hhmm(ev.start) + " – " + hhmm(ev.end)));
-        row.style.borderLeft = "5px solid " + ev.src.color;
-        row.appendChild(el("span", null, ev.title));
-        if (many(key)) row.appendChild(el("span", "srcname", ev.src.name));
-        row.onclick = function () { openEvent(key, ev); };
-        day.appendChild(row);
-      });
-      box.appendChild(day);
-    }
-    if (!any) box.appendChild(el("div", "msg", "Nenhum evento neste período."));
-    body.appendChild(box);
-  }
-
-  function renderPanel(key) {
-    var body = document.getElementById("b" + key);
-    var evs = (state.data[key] || []).filter(function (v) { return !state.hidden[v.src.id]; });
-    body.textContent = "";
-    if (state.mode === "MONTH") renderMonth(body, key, evs);
-    else if (state.mode === "WEEK") renderWeek(body, key, evs);
-    else renderList(body, key, evs);
-    var errs = state.errs[key] || [];
-    if (errs.length) body.appendChild(el("div", "msg err", "Não carregou: " + errs.join("; ")));
-  }
-  function buildLegend(key) {
-    var box = document.getElementById("l" + key);
-    box.textContent = "";
-    if (!many(key)) { box.style.display = "none"; return; }
-    box.style.display = "";
-    CAL[key].sources.forEach(function (s) {
-      var b = el("button", "lg" + (state.hidden[s.id] ? " off" : ""));
-      b.style.setProperty("--c", s.color);
-      b.appendChild(document.createElement("i"));
-      b.appendChild(document.createTextNode(s.name));
-      b.onclick = function () { state.hidden[s.id] = !state.hidden[s.id]; saveHidden(); buildLegend(key); renderPanel(key); };
-      box.appendChild(b);
-    });
-  }
-  function load() {
-    setTitle();
-    var seq = ++state.seq, r = getRange();
-    ["f", "t"].forEach(function (key) {
-      var show = state.show.indexOf(key) >= 0;
-      document.getElementById("p" + key).classList.toggle("hidden", !show);
-      if (!show) return;
-      buildLegend(key);
-      var body = document.getElementById("b" + key);
-      body.textContent = ""; body.appendChild(el("div", "msg", "Carregando…"));
-      Promise.all(CAL[key].sources.map(function (s) {
-        return fetchSource(s, r).then(function (evs) { return { evs: evs }; }, function (e) { return { err: s.name + ": " + e.message }; });
-      })).then(function (res) {
-        if (seq !== state.seq) return;
-        var all = [], errs = [];
-        res.forEach(function (x) { if (x.err) errs.push(x.err); else all = all.concat(x.evs); });
-        state.data[key] = all; state.errs[key] = errs;
-        if (errs.length === res.length) {
-          body.textContent = "";
-          body.appendChild(el("div", "msg err", "Não foi possível carregar: " + errs.join("; ") + ". Verifique se você fez login e tem permissão nestas agendas."));
-          return;
-        }
-        renderPanel(key);
-      });
-    });
-    document.querySelectorAll("[data-show]").forEach(function (b) { b.classList.toggle("on", b.dataset.show === state.show); });
-    document.querySelectorAll("[data-mode]").forEach(function (b) { b.classList.toggle("on", b.dataset.mode === state.mode); });
-  }
-  function move(dir) {
-    var c = state.cursor;
-    if (state.mode === "MONTH") state.cursor = new Date(c.getFullYear(), c.getMonth() + dir, 1);
-    else if (state.mode === "WEEK") state.cursor = addDays(c, 7 * dir);
-    else state.cursor = addDays(c, 30 * dir);
-    load();
-  }
-
-  document.getElementById("prev").onclick = function () { move(-1); };
-  document.getElementById("next").onclick = function () { move(1); };
-  document.getElementById("today").onclick = function () { state.cursor = sod(new Date()); load(); };
-  document.querySelectorAll("[data-show]").forEach(function (b) { 
-    b.onclick = function () { 
-      state.show = b.dataset.show; 
-      load(); 
-    }; 
-  });
-  document.querySelectorAll("[data-mode]").forEach(function (b) { b.onclick = function () { state.mode = b.dataset.mode; load(); }; });
-  document.getElementById("ov").onclick = function (e) { if (e.target.id === "ov") closeModal(); };
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
-</script>
-
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
-</body>
-</html>
+      var div
