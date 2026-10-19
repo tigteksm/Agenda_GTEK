@@ -70,7 +70,6 @@
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
 
-  /* ========== MODAL POST-IT COMPACTO ========== */
   #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -612,7 +611,8 @@
 
   function openEditModal(key, ev) {
     currentEditEvent = ev;
-    const isEdit = !!ev;
+    // ✅ CORREÇÃO: verifica se tem id real (não apenas se é objeto)
+    const isEdit = ev && ev.id;
     const calId = ev ? ev.src.id : getDefaultCalendarId(key);
     const calName = ev ? (CAL[key].name + (many(key) ? " · " + ev.src.name : "")) : CAL[key].name;
     const title = ev ? ev.title : '';
@@ -670,6 +670,7 @@
         body.appendChild(hiddenCal);
       }
       
+      // ✅ CORREÇÃO: seletor de cor aparece quando é TECNICA e NÃO está editando
       if (key === 't' && !isEdit) {
         var fieldColor = document.createElement('div');
         fieldColor.className = 'field';
@@ -962,7 +963,7 @@
       actions.className = 'postit-actions';
       var btnNew = document.createElement('button');
       btnNew.className = 'btn btn-primary';
-      btnNew.innerHTML = '➕ Novo Evento neste dia';
+      btnNew.innerHTML = ' Novo Evento neste dia';
       btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
       actions.appendChild(btnNew);
       body.appendChild(actions);
@@ -1136,7 +1137,6 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 </script>
 
-<!-- Scripts do Google DEVEM vir DEPOIS do script principal para encontrar as funções onload -->
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
 
