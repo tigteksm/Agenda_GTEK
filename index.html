@@ -170,7 +170,6 @@
   }
   #box .field textarea { min-height: 70px; resize: vertical; }
   
-  /* Linha compacta: Data + Hora lado a lado */
   #box .datetime-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -198,7 +197,6 @@
     font-size: 0.85rem;
   }
   
-  /* Seletor de cor */
   #box .color-selector {
     display: flex;
     gap: 8px;
@@ -303,7 +301,7 @@
   
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
 
@@ -328,9 +326,6 @@
 
 <div id="ov"><div id="box"></div></div>
 
-   <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
-   <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
-
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
@@ -341,7 +336,6 @@
   let currentEditEvent = null;
   let isUserLoggedIn = false;
 
-  // Mapeamento de cores para TECNICA (colorId do Google Calendar)
   const COLOR_MAP = {
     'green':  { colorId: '10', hex: '#0b8043', name: 'Verde' },
     'red':    { colorId: '11', hex: '#d93025', name: 'Vermelho' },
@@ -489,7 +483,6 @@
     var allDay = !!it.start.date, s, e;
     if (allDay) { var a = it.start.date.split("-"), b = it.end.date.split("-"); s = new Date(+a[0], a[1] - 1, +a[2]); e = new Date(+b[0], b[1] - 1, +b[2]); }
     else { s = new Date(it.start.dateTime); e = new Date(it.end.dateTime); }
-    // Extrai cor customizada da descrição (tag [COLOR:xxx])
     var customColor = null;
     var desc = it.description || "";
     var colorMatch = desc.match(/\[COLOR:(\w+)\]/);
@@ -498,17 +491,8 @@
       desc = desc.replace(/\[COLOR:\w+\]\s*/, '').trim();
     }
     return { 
-      id: it.id, 
-      title: it.summary || "(sem título)", 
-      allDay: allDay, 
-      start: s, 
-      end: e, 
-      loc: it.location || "", 
-      desc: desc, 
-      src: src, 
-      etag: it.etag,
-      colorId: it.colorId,
-      customColor: customColor
+      id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, 
+      loc: it.location || "", desc: desc, src: src, etag: it.etag, colorId: it.colorId, customColor: customColor
     };
   }
   
@@ -571,7 +555,6 @@
       header.querySelector('.subtitle')?.remove();
       var h2 = document.createElement('h2');
       h2.textContent = ev.title;
-      // Aplica cor customizada no título se existir
       if (ev.customColor && COLOR_MAP[ev.customColor]) {
         h2.style.color = COLOR_MAP[ev.customColor].hex;
       }
@@ -649,7 +632,6 @@
       header.insertBefore(subtitle, header.firstChild);
       header.insertBefore(h2, header.firstChild);
       
-      // Título
       var fieldTitle = document.createElement('div');
       fieldTitle.className = 'field';
       var lblTitle = document.createElement('label');
@@ -663,7 +645,6 @@
       fieldTitle.appendChild(inpTitle);
       body.appendChild(fieldTitle);
       
-      // Seletor de agenda (FUNCIONAL)
       if (key === 'f' && !isEdit && many(key)) {
         var fieldCal = document.createElement('div');
         fieldCal.className = 'field';
@@ -689,7 +670,6 @@
         body.appendChild(hiddenCal);
       }
       
-      // Seletor de cor (TECNICA - apenas na criação)
       if (key === 't' && !isEdit) {
         var fieldColor = document.createElement('div');
         fieldColor.className = 'field';
@@ -720,7 +700,6 @@
         body.appendChild(hiddenColor);
       }
       
-      // Data e Hora de Início (linha compacta)
       var dtStartRow = document.createElement('div');
       dtStartRow.className = 'datetime-row';
       
@@ -744,4 +723,422 @@
       timePairStart.className = 'time-pair';
       var times = generateTimeOptions();
       
-      var div
+      var divH = document.createElement('div');
+      var lblH = document.createElement('label');
+      lblH.textContent = 'Horas';
+      var selH = document.createElement('select');
+      selH.id = 'edit-start-hour';
+      times.hours.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h; opt.textContent = h;
+        if (parseInt(h) === startDate.getHours()) opt.selected = true;
+        selH.appendChild(opt);
+      });
+      divH.appendChild(lblH); divH.appendChild(selH);
+      
+      var divM = document.createElement('div');
+      var lblM = document.createElement('label');
+      lblM.textContent = 'Minutos';
+      var selM = document.createElement('select');
+      selM.id = 'edit-start-minute';
+      times.minutes.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m; opt.textContent = m;
+        if (String(startDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
+        selM.appendChild(opt);
+      });
+      divM.appendChild(lblM); divM.appendChild(selM);
+      
+      timePairStart.appendChild(divH); timePairStart.appendChild(divM);
+      fieldStartTime.appendChild(lblStartTime);
+      fieldStartTime.appendChild(timePairStart);
+      dtStartRow.appendChild(fieldStartTime);
+      body.appendChild(dtStartRow);
+      
+      var dtEndRow = document.createElement('div');
+      dtEndRow.className = 'datetime-row';
+      
+      var fieldEndDate = document.createElement('div');
+      fieldEndDate.className = 'field';
+      var lblEndDate = document.createElement('label');
+      lblEndDate.textContent = 'Data de Término';
+      var inpEndDate = document.createElement('input');
+      inpEndDate.type = 'date';
+      inpEndDate.id = 'edit-end-date';
+      inpEndDate.value = endDate.toISOString().split('T')[0];
+      fieldEndDate.appendChild(lblEndDate);
+      fieldEndDate.appendChild(inpEndDate);
+      dtEndRow.appendChild(fieldEndDate);
+      
+      var fieldEndTime = document.createElement('div');
+      fieldEndTime.className = 'field';
+      var lblEndTime = document.createElement('label');
+      lblEndTime.textContent = 'Hora de Término';
+      var timePairEnd = document.createElement('div');
+      timePairEnd.className = 'time-pair';
+      
+      var divH2 = document.createElement('div');
+      var lblH2 = document.createElement('label');
+      lblH2.textContent = 'Horas';
+      var selH2 = document.createElement('select');
+      selH2.id = 'edit-end-hour';
+      times.hours.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h; opt.textContent = h;
+        if (parseInt(h) === endDate.getHours()) opt.selected = true;
+        selH2.appendChild(opt);
+      });
+      divH2.appendChild(lblH2); divH2.appendChild(selH2);
+      
+      var divM2 = document.createElement('div');
+      var lblM2 = document.createElement('label');
+      lblM2.textContent = 'Minutos';
+      var selM2 = document.createElement('select');
+      selM2.id = 'edit-end-minute';
+      times.minutes.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m; opt.textContent = m;
+        if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
+        selM2.appendChild(opt);
+      });
+      divM2.appendChild(lblM2); divM2.appendChild(selM2);
+      
+      timePairEnd.appendChild(divH2); timePairEnd.appendChild(divM2);
+      fieldEndTime.appendChild(lblEndTime);
+      fieldEndTime.appendChild(timePairEnd);
+      dtEndRow.appendChild(fieldEndTime);
+      body.appendChild(dtEndRow);
+      
+      var fieldDesc = document.createElement('div');
+      fieldDesc.className = 'field';
+      var lblDesc = document.createElement('label');
+      lblDesc.textContent = 'Descrição / Conteúdo';
+      var txtDesc = document.createElement('textarea');
+      txtDesc.id = 'edit-desc';
+      txtDesc.placeholder = 'Detalhes do evento...';
+      txtDesc.value = desc;
+      fieldDesc.appendChild(lblDesc);
+      fieldDesc.appendChild(txtDesc);
+      body.appendChild(fieldDesc);
+      
+      var actions = document.createElement('div');
+      actions.className = 'postit-actions';
+      
+      var btnSave = document.createElement('button');
+      btnSave.className = 'btn btn-primary';
+      btnSave.innerHTML = isEdit ? '💾 Salvar' : '➕ Criar';
+      btnSave.onclick = function() { saveEventFromModal(key); };
+      actions.appendChild(btnSave);
+      
+      var btnCancel = document.createElement('button');
+      btnCancel.className = 'btn btn-secondary';
+      btnCancel.textContent = 'Cancelar';
+      btnCancel.onclick = closeModal;
+      actions.appendChild(btnCancel);
+      
+      if (isEdit) {
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-danger';
+        btnDel.innerHTML = '🗑️';
+        btnDel.title = 'Excluir';
+        btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
+        actions.appendChild(btnDel);
+      }
+      
+      body.appendChild(actions);
+    });
+  }
+
+  function openDayCreateModal(key, day) {
+    const fakeEv = {
+      src: { id: getDefaultCalendarId(key), name: 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' },
+      start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0),
+      end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0),
+      title: '', desc: '', id: null, customColor: null
+    };
+    openEditModal(key, fakeEv);
+  }
+
+  function getDefaultCalendarId(key) {
+    if (key === 'f') return CAL.f.sources[0].id;
+    return CAL.t.sources[0].id;
+  }
+
+  function saveEventFromModal(key) {
+    const calId = document.getElementById('edit-cal-id').value;
+    const title = document.getElementById('edit-title').value.trim();
+    const startDateStr = document.getElementById('edit-start-date').value;
+    const startHour = document.getElementById('edit-start-hour').value;
+    const startMinute = document.getElementById('edit-start-minute').value;
+    const endDateStr = document.getElementById('edit-end-date').value;
+    const endHour = document.getElementById('edit-end-hour').value;
+    const endMinute = document.getElementById('edit-end-minute').value;
+    const desc = document.getElementById('edit-desc').value;
+    
+    if (!title) { alert('Por favor, preencha o título do evento.'); return; }
+    if (!startDateStr || !endDateStr) { alert('Por favor, preencha as datas.'); return; }
+    
+    const startDateTime = new Date(`${startDateStr}T${startHour}:${startMinute}:00`);
+    const endDateTime = new Date(`${endDateStr}T${endHour}:${endMinute}:00`);
+    
+    if (endDateTime <= startDateTime) {
+      alert('A data/hora de término deve ser maior que a de início.');
+      return;
+    }
+    
+    const selectedColorEl = document.querySelector('#color-selector .color-option.selected');
+    const customColor = selectedColorEl ? selectedColorEl.dataset.color : null;
+    const colorId = (customColor && COLOR_MAP[customColor]) ? COLOR_MAP[customColor].colorId : undefined;
+    
+    let finalDesc = desc;
+    if (customColor) {
+      finalDesc = `[COLOR:${customColor}] ${desc}`.trim();
+    }
+    
+    const event = {
+      summary: title,
+      description: finalDesc,
+      start: { dateTime: startDateTime.toISOString(), timeZone: 'America/Sao_Paulo' },
+      end: { dateTime: endDateTime.toISOString(), timeZone: 'America/Sao_Paulo' }
+    };
+    if (colorId) event.colorId = colorId;
+    
+    const isEdit = currentEditEvent && currentEditEvent.id;
+    
+    let promise;
+    if (isEdit) {
+      promise = gapi.client.calendar.events.update({ calendarId: calId, eventId: currentEditEvent.id, resource: event });
+    } else {
+      promise = gapi.client.calendar.events.insert({ calendarId: calId, resource: event });
+    }
+    
+    promise.then(function() {
+      alert(isEdit ? '✅ Evento atualizado com sucesso!' : '✅ Evento criado com sucesso!');
+      closeModal();
+      load();
+    }).catch(function(err) {
+      alert('Erro: ' + (err.result ? err.result.error.message : err.message));
+    });
+  }
+
+  function deleteEvent(calendarId, eventId) {
+    if (!confirm("Tem certeza que deseja EXCLUIR este evento permanentemente?")) return;
+    gapi.client.calendar.events.delete({ calendarId: calendarId, eventId: eventId })
+    .then(function() { alert("Evento excluído com sucesso!"); closeModal(); load(); })
+    .catch(function(err) { alert("Erro ao excluir: " + (err.result ? err.result.error.message : err.message)); });
+  }
+
+  function openDay(key, day, evs) {
+    openModal(key, function (body, header) {
+      header.querySelector('h2')?.remove();
+      header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2');
+      h2.textContent = dayLabel(day);
+      var subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = CAL[key].name;
+      header.insertBefore(subtitle, header.firstChild);
+      header.insertBefore(h2, header.firstChild);
+      
+      if (evs.length === 0) {
+        var msg = document.createElement('div');
+        msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;';
+        msg.textContent = 'Nenhum evento neste dia.';
+        body.appendChild(msg);
+      } else {
+        evs.forEach(function (ev) {
+          var b = document.createElement('button');
+          b.className = 'item';
+          b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;';
+          var titleColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '';
+          b.style.borderLeft = "5px solid " + (titleColor || ev.src.color);
+          b.innerHTML = '<strong style="color:' + (titleColor || 'inherit') + '">' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; <strong style="color:' + (titleColor || 'inherit') + '">' + ev.title + '</strong>' + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : '');
+          b.onclick = function () { openEvent(key, ev); };
+          body.appendChild(b);
+        });
+      }
+      
+      var actions = document.createElement('div');
+      actions.className = 'postit-actions';
+      var btnNew = document.createElement('button');
+      btnNew.className = 'btn btn-primary';
+      btnNew.innerHTML = '➕ Novo Evento neste dia';
+      btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
+      actions.appendChild(btnNew);
+      body.appendChild(actions);
+    });
+  }
+  
+  function chip(key, ev) {
+    var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color;
+    var b = el("button", "chip" + (ev.allDay ? "" : " timed"), (ev.allDay ? "" : hhmm(ev.start) + " ") + ev.title);
+    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); 
+    b.style.setProperty("--c", displayColor); 
+    if (ev.customColor && COLOR_MAP[ev.customColor]) {
+      b.style.color = displayColor;
+      b.style.fontWeight = '600';
+    }
+    b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
+    return b;
+  }
+
+  function renderMonth(body, key, evs) {
+    var r = getRange(), g = el("div", "grid"), i, d;
+    ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].forEach(function (n) { g.appendChild(el("div", "dow", n)); });
+    for (i = 0; i < 42; i++) {
+      d = addDays(r.start, i);
+      var c = el("div", "cell" + (d.getMonth() !== state.cursor.getMonth() ? " other" : "") + (same(d, new Date()) ? " today" : ""));
+      c.appendChild(el("div", "num", d.getDate()));
+      var list = onDay(evs, d);
+      list.slice(0, 3).forEach(function (ev) { c.appendChild(chip(key, ev)); });
+      if (list.length > 3) {
+        var m = el("button", "more", "+" + (list.length - 3) + " mais");
+        (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list);
+        c.appendChild(m);
+      }
+      (function(dd) {
+        c.onclick = function() {
+          if (list.length === 0) openDayCreateModal(key, dd);
+          else openDay(key, dd, list);
+        };
+      })(d);
+      g.appendChild(c);
+    }
+    body.appendChild(g);
+  }
+  
+  function renderWeek(body, key, evs) {
+    var r = getRange(), w = el("div", "week"), i, d;
+    for (i = 0; i < 7; i++) {
+      d = addDays(r.start, i);
+      var col = el("div", "col" + (same(d, new Date()) ? " today" : ""));
+      col.appendChild(el("div", "hd", d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" })));
+      var dayEvents = onDay(evs, d);
+      dayEvents.forEach(function (ev) { col.appendChild(chip(key, ev)); });
+      (function(dd, evs) {
+        col.onclick = function(e) {
+          if (e.target.classList.contains('chip') || e.target.closest('.chip')) return;
+          if (evs.length === 0) openDayCreateModal(key, dd);
+          else openDay(key, dd, evs);
+        };
+      })(d, dayEvents);
+      w.appendChild(col);
+    }
+    body.appendChild(w);
+  }
+  
+  function renderList(body, key, evs) {
+    var r = getRange(), box = el("div", "list"), i, d, any = false;
+    for (i = 0; i < 30; i++) {
+      d = addDays(r.start, i);
+      var l = onDay(evs, d);
+      var day = el("div", "day");
+      day.appendChild(el("div", "dh", dayLabel(d)));
+      if (l.length > 0) {
+        any = true;
+        l.forEach(function (ev) {
+          var row = el("button", "row");
+          row.appendChild(el("span", "hr", ev.allDay ? "Dia inteiro" : hhmm(ev.start) + " – " + hhmm(ev.end)));
+          var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color;
+          row.style.borderLeft = "5px solid " + displayColor;
+          var titleSpan = el("span", null, ev.title);
+          if (ev.customColor && COLOR_MAP[ev.customColor]) {
+            titleSpan.style.color = displayColor;
+            titleSpan.style.fontWeight = '600';
+          }
+          row.appendChild(titleSpan);
+          if (many(key)) row.appendChild(el("span", "srcname", ev.src.name));
+          row.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
+          day.appendChild(row);
+        });
+      }
+      (function(dd, evs) {
+        day.onclick = function(e) {
+          if (e.target.classList.contains('row') || e.target.closest('.row')) return;
+          if (evs.length === 0) openDayCreateModal(key, dd);
+          else openDay(key, dd, evs);
+        };
+      })(d, l);
+      box.appendChild(day);
+    }
+    if (!any) box.appendChild(el("div", "msg", "Nenhum evento neste período."));
+    body.appendChild(box);
+  }
+
+  function renderPanel(key) {
+    var body = document.getElementById("b" + key);
+    var evs = (state.data[key] || []).filter(function (v) { return !state.hidden[v.src.id]; });
+    body.textContent = "";
+    if (state.mode === "MONTH") renderMonth(body, key, evs);
+    else if (state.mode === "WEEK") renderWeek(body, key, evs);
+    else renderList(body, key, evs);
+    var errs = state.errs[key] || [];
+    if (errs.length) body.appendChild(el("div", "msg err", "Não carregou: " + errs.join("; ")));
+  }
+  function buildLegend(key) {
+    var box = document.getElementById("l" + key);
+    box.textContent = "";
+    if (!many(key)) { box.style.display = "none"; return; }
+    box.style.display = "";
+    CAL[key].sources.forEach(function (s) {
+      var b = el("button", "lg" + (state.hidden[s.id] ? " off" : ""));
+      b.style.setProperty("--c", s.color);
+      b.appendChild(document.createElement("i"));
+      b.appendChild(document.createTextNode(s.name));
+      b.onclick = function () { state.hidden[s.id] = !state.hidden[s.id]; saveHidden(); buildLegend(key); renderPanel(key); };
+      box.appendChild(b);
+    });
+  }
+  function load() {
+    setTitle();
+    var seq = ++state.seq, r = getRange();
+    ["f", "t"].forEach(function (key) {
+      var show = state.show.indexOf(key) >= 0;
+      document.getElementById("p" + key).classList.toggle("hidden", !show);
+      if (!show) return;
+      buildLegend(key);
+      var body = document.getElementById("b" + key);
+      body.textContent = ""; body.appendChild(el("div", "msg", "Carregando…"));
+      Promise.all(CAL[key].sources.map(function (s) {
+        return fetchSource(s, r).then(function (evs) { return { evs: evs }; }, function (e) { return { err: s.name + ": " + e.message }; });
+      })).then(function (res) {
+        if (seq !== state.seq) return;
+        var all = [], errs = [];
+        res.forEach(function (x) { if (x.err) errs.push(x.err); else all = all.concat(x.evs); });
+        state.data[key] = all; state.errs[key] = errs;
+        if (errs.length === res.length) {
+          body.textContent = "";
+          body.appendChild(el("div", "msg err", "Não foi possível carregar: " + errs.join("; ") + ". Verifique se você fez login e tem permissão nestas agendas."));
+          return;
+        }
+        renderPanel(key);
+      });
+    });
+    document.querySelectorAll("[data-show]").forEach(function (b) { b.classList.toggle("on", b.dataset.show === state.show); });
+    document.querySelectorAll("[data-mode]").forEach(function (b) { b.classList.toggle("on", b.dataset.mode === state.mode); });
+  }
+  function move(dir) {
+    var c = state.cursor;
+    if (state.mode === "MONTH") state.cursor = new Date(c.getFullYear(), c.getMonth() + dir, 1);
+    else if (state.mode === "WEEK") state.cursor = addDays(c, 7 * dir);
+    else state.cursor = addDays(c, 30 * dir);
+    load();
+  }
+
+  document.getElementById("prev").onclick = function () { move(-1); };
+  document.getElementById("next").onclick = function () { move(1); };
+  document.getElementById("today").onclick = function () { state.cursor = sod(new Date()); load(); };
+  document.querySelectorAll("[data-show]").forEach(function (b) { 
+    b.onclick = function () { state.show = b.dataset.show; load(); }; 
+  });
+  document.querySelectorAll("[data-mode]").forEach(function (b) { b.onclick = function () { state.mode = b.dataset.mode; load(); }; });
+  document.getElementById("ov").onclick = function (e) { if (e.target.id === "ov") closeModal(); };
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+</script>
+
+<!-- Scripts do Google DEVEM vir DEPOIS do script principal para encontrar as funções onload -->
+<script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
+<script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+
+</body>
+</html>
