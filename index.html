@@ -264,7 +264,7 @@
   .teams-btn-edit:hover { background: #464775; }
   
   .teams-progress { height: 2px; background: #e5e7eb; }
-  .teams-progress-bar { height: 100%; background: #6264a7; width: 100%; animation: progressShrink 10s linear forwards; }
+  .teams-progress-bar { height: 100%; background: #6264a7; width: 100%; animation: progressShrink 25s linear forwards; }
 </style>
 </head>
 <body>
@@ -306,7 +306,7 @@
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
-  const REMINDER_DISPLAY_TIME = 10000; // 10 segundos
+  const REMINDER_DISPLAY_TIME = 25000; // 25 segundos
   
   let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
   let reminderCheckInterval = null, titleBlinkInterval = null, originalTitle = document.title;
