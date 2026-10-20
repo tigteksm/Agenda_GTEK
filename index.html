@@ -26,6 +26,8 @@
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
   #notif-btn { background: #f59e0b; color: white; border: none; font-weight: bold; }
   #notif-btn.granted { background: #10b981; }
+  #keepawake-btn { background: #6b7280; color: white; border: none; font-weight: bold; }
+  #keepawake-btn.on { background: #10b981; }
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .panel.hidden { display:none; }
@@ -339,6 +341,7 @@
     <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
     <button id="notif-btn" onclick="ativarNotificacoesAgenda()" title="Ativar notificações do sistema">🔔 Ativar Notificações</button>
+    <button id="keepawake-btn" onclick="alternarKeepAwake()" title="Impede o Chrome de congelar a aba em segundo plano">⏻ Manter Ativo</button>
   </div>
   <div class="group">
     <span class="lbl">Mostrar:</span>
@@ -365,7 +368,7 @@
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
-  const REMINDER_DISPLAY_TIME = 25000; // 25 segundos
+  const REMINDER_DISPLAY_TIME = 25000;
   
   let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
   let reminderWorker = null, titleBlinkInterval = null, originalTitle = document.title;
@@ -534,36 +537,90 @@
   }
 
   // ======================================================================
-  // ===== NOVO SISTEMA DE ALERTAS - CORRIGIDO E APRIMORADO ================
+  // ===== SISTEMA DE ALERTAS v3 - KEEP-AWAKE + NOTIFICAÇÃO DE SISTEMA ====
   // ======================================================================
   
   const MINUTOS_ALERTA = [15, 10, 5];
   const ALERTA_STORAGE_KEY = "agenda_alertas_v2";
   
-  // Persistência dos disparos em localStorage (não reseta ao recarregar página)
-  function hojeISO() {
-    return new Date().toISOString().slice(0, 10);
-  }
+  function hojeISO() { return new Date().toISOString().slice(0, 10); }
   
   function carregarControleDisparos() {
     const padrao = { dia: hojeISO(), eventos: {} };
     try {
       const salvo = JSON.parse(localStorage.getItem(ALERTA_STORAGE_KEY));
-      if (!salvo || salvo.dia !== padrao.dia) {
-        return padrao;
-      }
+      if (!salvo || salvo.dia !== padrao.dia) return padrao;
       return { dia: padrao.dia, eventos: salvo.eventos || {} };
-    } catch (e) {
-      return padrao;
-    }
+    } catch (e) { return padrao; }
   }
   
   function salvarControleDisparos(controle) {
-    try {
-      localStorage.setItem(ALERTA_STORAGE_KEY, JSON.stringify(controle));
-    } catch (e) { console.warn('Erro ao salvar controle:', e); }
+    try { localStorage.setItem(ALERTA_STORAGE_KEY, JSON.stringify(controle)); } catch (e) {}
   }
   
+  // ---------- KEEP-AWAKE: impede o Chrome de CONGELAR a aba oculta ----------
+  const keepAwake = { ctx: null, nodes: null, ativo: false, desejado: false };
+  
+  function iniciarKeepAwake() {
+    keepAwake.desejado = true;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      if (!keepAwake.ctx) keepAwake.ctx = new AC();
+      if (!keepAwake.nodes) {
+        const osc = keepAwake.ctx.createOscillator();
+        const gain = keepAwake.ctx.createGain();
+        gain.gain.value = 0.0001;
+        osc.type = 'sine';
+        osc.frequency.value = 300;
+        osc.connect(gain);
+        gain.connect(keepAwake.ctx.destination);
+        osc.start();
+        keepAwake.nodes = { osc, gain };
+      }
+      if (keepAwake.ctx.state === 'suspended') {
+        keepAwake.ctx.resume().then(function() {
+          keepAwake.ativo = keepAwake.ctx.state === 'running';
+          atualizarBotaoKeepAwake();
+        }).catch(function() {});
+      }
+      keepAwake.ativo = keepAwake.ctx.state === 'running';
+      atualizarBotaoKeepAwake();
+      return keepAwake.ativo;
+    } catch (e) {
+      console.warn('Keep-awake indisponível:', e);
+      return false;
+    }
+  }
+  
+  function pararKeepAwake() {
+    keepAwake.desejado = false;
+    keepAwake.ativo = false;
+    try {
+      if (keepAwake.nodes) { keepAwake.nodes.osc.stop(); keepAwake.nodes = null; }
+      if (keepAwake.ctx) keepAwake.ctx.suspend();
+    } catch (e) {}
+    atualizarBotaoKeepAwake();
+  }
+  
+  function alternarKeepAwake() { keepAwake.ativo ? pararKeepAwake() : iniciarKeepAwake(); }
+  window.alternarKeepAwake = alternarKeepAwake;
+  
+  function atualizarBotaoKeepAwake() {
+    const b = document.getElementById('keepawake-btn');
+    if (!b) return;
+    b.classList.toggle('on', keepAwake.ativo);
+    b.textContent = keepAwake.ativo ? '⚡ Aba Mantida Ativa' : '⏻ Manter Ativo';
+  }
+  
+  // Autoplay policy: ativa no primeiro clique do usuário após o login
+  document.addEventListener('pointerdown', function gestoKeepAwake() {
+    if (isUserLoggedIn && iniciarKeepAwake()) {
+      document.removeEventListener('pointerdown', gestoKeepAwake, true);
+    }
+  }, true);
+  
+  // ---------- Verificação dos marcos 15 / 10 / 5 (disparo único) ----------
   function verificarAlertas() {
     if (!state.data.f && !state.data.t) return;
     
@@ -575,78 +632,56 @@
     allEvents.forEach(function(ev) {
       if (!ev.id || ev.allDay) return;
       
-      // Verifica se outra máquina já interagiu
       const syncData = checkReminderSync(ev.id);
       if (syncData && syncData.action === 'dismissed') return;
       
       const eventStart = ev.start.getTime();
-      
-      // Se o horário já passou, não dispara mais
       if (agora >= eventStart) return;
       
       const chave = String(ev.id);
-      if (!controle.eventos[chave]) {
-        controle.eventos[chave] = {};
-      }
+      if (!controle.eventos[chave]) controle.eventos[chave] = {};
+      if (!reminderState[chave]) reminderState[chave] = { snoozeUntil: 0 };
+      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) return;
       
-      // Verifica snooze (se o usuário pediu para adiar)
-      if (!reminderState[chave]) {
-        reminderState[chave] = { snoozeUntil: 0 };
-      }
-      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) {
-        return;
-      }
-      
-      // Encontra apenas o marco atual: 15 -> 10 -> 5
       const devido = MINUTOS_ALERTA.find(function(minutos) {
         const limite = eventStart - minutos * 60000;
         return agora >= limite && !controle.eventos[chave][minutos];
       });
       
       if (devido) {
-        // Marca o marco atual e também marcos anteriores que já ficaram para trás
-        // Isso evita disparar 15 e 10 atrasados quando a aba voltou depois de muito tempo
         MINUTOS_ALERTA.forEach(function(minutos) {
-          if (minutos >= devido) {
-            controle.eventos[chave][minutos] = true;
-          }
+          if (minutos >= devido) controle.eventos[chave][minutos] = true;
         });
-        
         mudou = true;
         mostrarAlerta(ev, devido);
       }
     });
     
-    if (mudou) {
-      salvarControleDisparos(controle);
-    }
+    if (mudou) salvarControleDisparos(controle);
   }
   
   function mostrarAlerta(ev, minutos) {
-    // Cria um rs compatível com showReminderToast
     const rs = reminderState[ev.id] || { snoozeUntil: 0 };
+    
     showReminderToast(ev, rs, minutos);
     
-    // Notificação do sistema se aba estiver oculta
-    if (
-      document.hidden &&
-      "Notification" in window &&
-      Notification.permission === "granted"
-    ) {
-      try {
-        new Notification(`Faltam ${minutos} minutos`, {
-          body: ev.title + (ev.desc ? "\n" + ev.desc.substring(0, 60) : ""),
-          tag: `agenda-${ev.id}-${minutos}`,
-          requireInteraction: false,
-          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>"
-        });
-      } catch (e) {
-        console.warn("Falha ao mostrar notificação:", e);
-      }
-    }
+    if (document.hidden) notificarSistema(ev, minutos);
   }
   
-  // Worker que mantém o timer rodando mesmo com a aba em background
+  function notificarSistema(ev, minutos) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    try {
+      const n = new Notification(`⏰ Faltam ${minutos} min — ${ev.title}`, {
+        body: `${hhmm(ev.start)} – ${hhmm(ev.end)}${ev.desc ? '\n' + ev.desc.substring(0, 80) : ''}`,
+        tag: `agenda-${ev.id}-${minutos}`,
+        requireInteraction: true,
+        silent: false
+      });
+      n.onclick = function() { window.focus(); n.close(); };
+    } catch (e) { console.warn('Falha na notificação do sistema:', e); }
+  }
+  
+  // ---------- Timer: Web Worker + backup na página ----------
   function iniciarTimerViaWorker() {
     try {
       const codigoWorker = `
@@ -654,21 +689,14 @@
         self.onmessage = function (e) {
           if (e.data && e.data.cmd === "start") {
             clearTimeout(timer);
-            const tick = () => {
-              self.postMessage("tick");
-              timer = setTimeout(tick, 1000);
-            };
+            const tick = () => { self.postMessage("tick"); timer = setTimeout(tick, 1000); };
             tick();
-          } else if (e.data && e.data.cmd === "stop") {
-            clearTimeout(timer);
-          }
+          } else if (e.data && e.data.cmd === "stop") { clearTimeout(timer); }
         };
       `;
       const blob = new Blob([codigoWorker], { type: "application/javascript" });
       const worker = new Worker(URL.createObjectURL(blob));
-      worker.onmessage = function() {
-        verificarAlertas();
-      };
+      worker.onmessage = function() { verificarAlertas(); };
       worker.postMessage({ cmd: "start" });
       return worker;
     } catch (e) {
@@ -677,52 +705,48 @@
     }
   }
   
+  let backupInterval = null;
   function iniciarSistemaAlertas() {
     pararSistemaAlertas();
     verificarAlertas();
     reminderWorker = iniciarTimerViaWorker();
+    backupInterval = setInterval(verificarAlertas, 1000);
   }
   
   function pararSistemaAlertas() {
     if (reminderWorker) {
-      if (reminderWorker.terminate) {
-        reminderWorker.terminate();
-      } else if (typeof reminderWorker === 'number') {
-        clearInterval(reminderWorker);
-      }
+      if (reminderWorker.terminate) reminderWorker.terminate();
+      else if (typeof reminderWorker === 'number') clearInterval(reminderWorker);
       reminderWorker = null;
     }
+    if (backupInterval) { clearInterval(backupInterval); backupInterval = null; }
   }
   
-  // Recalcula imediatamente quando a aba volta a ficar visível
+  // Ao voltar para a aba: reativa o keep-awake e recalcula na hora
   document.addEventListener("visibilitychange", function() {
-    if (!document.hidden && isUserLoggedIn) {
-      verificarAlertas();
+    if (!document.hidden) {
+      if (keepAwake.desejado && keepAwake.ctx && keepAwake.ctx.state === 'suspended') iniciarKeepAwake();
+      if (isUserLoggedIn) verificarAlertas();
     }
   });
+  window.addEventListener("focus", function() { if (isUserLoggedIn) verificarAlertas(); });
   
-  window.addEventListener("focus", function() {
-    if (isUserLoggedIn) verificarAlertas();
-  });
-  
-  // Ativa notificações do sistema (clicando no botão 🔔)
+  // ---------- Botão 🔔 Notificações ----------
   async function ativarNotificacoesAgenda() {
-    if (!("Notification" in window)) {
-      alert("Este navegador não suporta notificações.");
-      return;
-    }
+    if (!("Notification" in window)) { alert("Este navegador não suporta notificações."); return; }
     if (Notification.permission === "granted") {
-      alert("✅ Notificações já estão ativadas!\nVocê receberá avisos mesmo quando a aba estiver em segundo plano.");
+      iniciarKeepAwake();
+      alert("✅ Notificações já estão ativadas!");
       return;
     }
     if (Notification.permission === "denied") {
-      alert("❌ As notificações estão bloqueadas.\nLibere nas configurações do navegador (clique no ícone 🔒 ao lado da URL).");
+      alert("❌ Notificações bloqueadas. Libere no ícone 🔒 ao lado da URL.");
       return;
     }
     const permissao = await Notification.requestPermission();
     if (permissao === "granted") {
-      alert("✅ Notificações ativadas com sucesso!\nVocê será avisado mesmo quando a aba estiver em segundo plano.");
-      new Notification("📅 Notificações ativadas", { body: "Você receberá alertas da agenda aqui." });
+      iniciarKeepAwake();
+      new Notification("📅 Notificações ativadas", { body: "Você receberá alertas da agenda aqui, mesmo com o navegador minimizado." });
       atualizarEstadoBotaoNotificacao();
     } else {
       alert("⚠️ Permissão de notificação não concedida.");
@@ -741,14 +765,11 @@
     }
   }
   
-  // Expõe globalmente para o onclick
   window.ativarNotificacoesAgenda = ativarNotificacoesAgenda;
-  
-  // Inicializa o estado do botão ao carregar a página
   atualizarEstadoBotaoNotificacao();
-
+  atualizarBotaoKeepAwake();
   // ======================================================================
-  // ===== FIM DO NOVO SISTEMA DE ALERTAS ==================================
+  // ===== FIM DO SISTEMA DE ALERTAS v3 ====================================
   // ======================================================================
   
   function getEventColorClass(ev) {
@@ -807,7 +828,6 @@
     
     toast.querySelector('[data-action="snooze"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      // Snooze: adia o próximo alerta por 5 minutos
       if (!reminderState[ev.id]) reminderState[ev.id] = {};
       reminderState[ev.id].snoozeUntil = Date.now() + 5 * 60000;
       
@@ -851,7 +871,7 @@
     document.title = originalTitle;
   }
 
-  // ========== RESTO DO CÓDIGO (igual ao anterior) ==========
+  // ========== RESTO DO CÓDIGO ==========
   
   function getRange() {
     var c = state.cursor, s;
