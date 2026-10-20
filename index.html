@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agenda FUNCIONAL | TECNICA</title>
-<!-- Favicon inline para evitar erro 404 -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
 <style>
   :root { --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#d9dde3; --accent:#1a73e8; --f:#0b8043; --t:#8e24aa; --today:#e8f0fe; }
@@ -122,7 +121,7 @@
   #box::-webkit-scrollbar-track { background: transparent; }
   #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 
-  /* ========== POPUP ESTILO TEAMS ========== */
+  /* ========== POPUP ESTILO TEAMS COM CORES DINÂMICAS ========== */
   #reminder-container {
     position: fixed;
     bottom: 16px;
@@ -143,9 +142,70 @@
     pointer-events: auto;
     animation: teamsSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
-    border-left: 3px solid #6264a7;
+    border-left: 4px solid #6264a7;
     font-family: 'Segoe UI', system-ui, sans-serif;
   }
+  
+  /* Cores dinâmicas baseadas no evento */
+  .teams-toast.color-green {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-left-color: #28a745;
+  }
+  .teams-toast.color-green .teams-header { background: rgba(40, 167, 69, 0.15); }
+  .teams-toast.color-green .teams-event-title { color: #155724; }
+  .teams-toast.color-green .teams-event-time { color: #1e7e34; }
+  .teams-toast.color-green .teams-event-desc { color: #2f5a2f; }
+  .teams-toast.color-green .teams-btn-now { background: #28a745; }
+  .teams-toast.color-green .teams-btn-now:hover { background: #218838; }
+  .teams-toast.color-green .teams-progress-bar { background: #28a745; }
+  
+  .teams-toast.color-red {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border-left-color: #dc3545;
+  }
+  .teams-toast.color-red .teams-header { background: rgba(220, 53, 69, 0.15); }
+  .teams-toast.color-red .teams-event-title { color: #721c24; }
+  .teams-toast.color-red .teams-event-time { color: #bd2130; }
+  .teams-toast.color-red .teams-event-desc { color: #5a1a1f; }
+  .teams-toast.color-red .teams-btn-now { background: #dc3545; }
+  .teams-toast.color-red .teams-btn-now:hover { background: #c82333; }
+  .teams-toast.color-red .teams-progress-bar { background: #dc3545; }
+  
+  .teams-toast.color-blue {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border-left-color: #17a2b8;
+  }
+  .teams-toast.color-blue .teams-header { background: rgba(23, 162, 184, 0.15); }
+  .teams-toast.color-blue .teams-event-title { color: #0c5460; }
+  .teams-toast.color-blue .teams-event-time { color: #117a8b; }
+  .teams-toast.color-blue .teams-event-desc { color: #1e4a52; }
+  .teams-toast.color-blue .teams-btn-now { background: #17a2b8; }
+  .teams-toast.color-blue .teams-btn-now:hover { background: #138496; }
+  .teams-toast.color-blue .teams-progress-bar { background: #17a2b8; }
+  
+  .teams-toast.color-orange {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+    border-left-color: #ffc107;
+  }
+  .teams-toast.color-orange .teams-header { background: rgba(255, 193, 7, 0.15); }
+  .teams-toast.color-orange .teams-event-title { color: #856404; }
+  .teams-toast.color-orange .teams-event-time { color: #d39e00; }
+  .teams-toast.color-orange .teams-event-desc { color: #6b5205; }
+  .teams-toast.color-orange .teams-btn-now { background: #ffc107; }
+  .teams-toast.color-orange .teams-btn-now:hover { background: #e0a800; }
+  .teams-toast.color-orange .teams-progress-bar { background: #ffc107; }
+  
+  .teams-toast.color-purple {
+    background: linear-gradient(135deg, #e2d4f0 0%, #d8c4e8 100%);
+    border-left-color: #8e24aa;
+  }
+  .teams-toast.color-purple .teams-header { background: rgba(142, 36, 170, 0.15); }
+  .teams-toast.color-purple .teams-event-title { color: #4a1f59; }
+  .teams-toast.color-purple .teams-event-time { color: #6a1b9a; }
+  .teams-toast.color-purple .teams-event-desc { color: #3d1a47; }
+  .teams-toast.color-purple .teams-btn-now { background: #8e24aa; }
+  .teams-toast.color-purple .teams-btn-now:hover { background: #7b1fa2; }
+  .teams-toast.color-purple .teams-progress-bar { background: #8e24aa; }
   
   @keyframes teamsSlideIn {
     from { transform: translateX(360px) scale(0.95); opacity: 0; }
@@ -170,14 +230,13 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
   }
   
   .teams-icon {
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #6264a7 0%, #464775 100%);
+    background: rgba(0,0,0,0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -191,13 +250,13 @@
   .teams-header-text .app-name {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6264a7;
+    opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
   .teams-header-text .time-badge {
     font-size: 0.7rem;
-    color: #6b7280;
+    opacity: 0.75;
     margin-top: 1px;
   }
   
@@ -205,7 +264,6 @@
   .teams-event-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #1f2937;
     margin: 0 0 4px 0;
     line-height: 1.3;
     overflow: hidden;
@@ -214,7 +272,6 @@
   }
   .teams-event-time {
     font-size: 0.78rem;
-    color: #6b7280;
     margin: 0 0 4px 0;
     display: flex;
     align-items: center;
@@ -222,7 +279,6 @@
   }
   .teams-event-desc {
     font-size: 0.78rem;
-    color: #4b5563;
     margin: 0;
     line-height: 1.4;
     max-height: 40px;
@@ -237,8 +293,7 @@
     display: flex;
     gap: 4px;
     padding: 8px 12px 10px;
-    border-top: 1px solid #f3f4f6;
-    background: #fafbfc;
+    border-top: 1px solid rgba(0,0,0,0.08);
   }
   
   .teams-btn {
@@ -255,16 +310,17 @@
     justify-content: center;
     gap: 3px;
     font-family: 'Segoe UI', system-ui, sans-serif;
+    color: white;
   }
-  .teams-btn-now { background: #10b981; color: white; }
+  .teams-btn-now { background: #10b981; }
   .teams-btn-now:hover { background: #059669; }
-  .teams-btn-snooze { background: #f59e0b; color: white; }
+  .teams-btn-snooze { background: #f59e0b; }
   .teams-btn-snooze:hover { background: #d97706; }
-  .teams-btn-edit { background: #6264a7; color: white; }
+  .teams-btn-edit { background: #6264a7; }
   .teams-btn-edit:hover { background: #464775; }
   
-  .teams-progress { height: 2px; background: #e5e7eb; }
-  .teams-progress-bar { height: 100%; background: #6264a7; width: 100%; animation: progressShrink 25s linear forwards; }
+  .teams-progress { height: 2px; background: rgba(0,0,0,0.1); }
+  .teams-progress-bar { height: 100%; width: 100%; animation: progressShrink 25s linear forwards; }
 </style>
 </head>
 <body>
@@ -278,7 +334,7 @@
   </div>
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
   <div class="group">
@@ -310,7 +366,7 @@
   
   let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
   let reminderCheckInterval = null, titleBlinkInterval = null, originalTitle = document.title;
-  const COLOR_MAP = { 'green': { colorId: '10', hex: '#0b8043', name: 'Verde' }, 'red': { colorId: '11', hex: '#d93025', name: 'Vermelho' }, 'blue': { colorId: '9', hex: '#1a73e8', name: 'Azul' }, 'orange': { colorId: '6', hex: '#e8710a', name: 'Laranja' } };
+  const COLOR_MAP = { 'green': { colorId: '10', hex: '#0b8043', name: 'Verde', toastClass: 'color-green' }, 'red': { colorId: '11', hex: '#d93025', name: 'Vermelho', toastClass: 'color-red' }, 'blue': { colorId: '9', hex: '#1a73e8', name: 'Azul', toastClass: 'color-blue' }, 'orange': { colorId: '6', hex: '#e8710a', name: 'Laranja', toastClass: 'color-orange' } };
   const reminderState = {};
 
   var CAL = {
@@ -336,13 +392,12 @@
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
   function generateTimeOptions() { const hours = []; for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0')); return { hours, minutes: ['00', '15', '30', '45'] }; }
 
-  // ===== SOM DE NOTIFICAÇÃO (gerado via Web Audio API) =====
+  // ===== SOM DE NOTIFICAÇÃO =====
   let audioCtx = null;
   function playNotificationSound() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const now = audioCtx.currentTime;
-      // Dois "bips" estilo Teams
       [0, 0.15].forEach(function(delay) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -359,51 +414,68 @@
     } catch (e) { console.log('Audio não disponível'); }
   }
 
-  // ===== NOTIFICAÇÃO NATIVA DO SO =====
-  function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
+  // ===== SINCRONIZAÇÃO ENTRE MÁQUINAS VIA LOCALSTORAGE =====
+  const SYNC_KEY_PREFIX = 'reminder_sync_';
+  
+  function getSyncKey(eventId) {
+    return SYNC_KEY_PREFIX + eventId;
+  }
+  
+  function checkReminderSync(eventId) {
+    const syncData = localStorage.getItem(getSyncKey(eventId));
+    if (!syncData) return null;
+    
+    try {
+      const data = JSON.parse(syncData);
+      const now = Date.now();
+      // Dados válidos por 30 segundos
+      if (now - data.timestamp < 30000) {
+        return data;
+      } else {
+        localStorage.removeItem(getSyncKey(eventId));
+        return null;
+      }
+    } catch (e) {
+      return null;
     }
   }
   
-  function showNativeNotification(ev, minutesUntil) {
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
-    
-    const timeText = minutesUntil === 0 ? 'Agora!' : `Em ${minutesUntil} min`;
-    const n = new Notification('⏰ Lembrete de Evento', {
-      body: `${ev.title}\n${timeText} - ${hhmm(ev.start)}`,
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>',
-      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90"></text></svg>',
-      tag: 'reminder-' + ev.id,
-      requireInteraction: false,
-      silent: false
-    });
-    
-    n.onclick = function() {
-      window.focus();
-      const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
-      openEditModal(key, ev);
-      n.close();
+  function updateReminderSync(eventId, action) {
+    const syncData = {
+      eventId: eventId,
+      action: action,
+      timestamp: Date.now(),
+      machineId: navigator.userAgent + '_' + Date.now()
     };
+    localStorage.setItem(getSyncKey(eventId), JSON.stringify(syncData));
     
-    // Fecha automaticamente após 10s
-    setTimeout(function() { n.close(); }, REMINDER_DISPLAY_TIME);
+    // Dispara evento customizado para outras abas
+    window.dispatchEvent(new CustomEvent('reminderSync', { detail: syncData }));
   }
-
-  // ===== PISCAR TÍTULO DA ABA =====
-  function startTitleBlink(message) {
-    stopTitleBlink();
-    let showMsg = true;
-    titleBlinkInterval = setInterval(function() {
-      document.title = showMsg ? `🔔 ${message}` : originalTitle;
-      showMsg = !showMsg;
-    }, 1000);
-  }
-  function stopTitleBlink() {
-    if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
-    document.title = originalTitle;
-  }
+  
+  // Escuta mudanças no localStorage (outras abas/máquinas)
+  window.addEventListener('storage', function(e) {
+    if (e.key.startsWith(SYNC_KEY_PREFIX)) {
+      try {
+        const data = JSON.parse(e.newValue);
+        if (data && data.action) {
+          // Outra máquina interagiu - fecha o toast correspondente
+          const toast = document.querySelector(`[data-event-id="${data.eventId}"]`);
+          if (toast) {
+            closeReminderToast(toast, null, true, true);
+          }
+        }
+      } catch (err) { console.error('Erro ao sincronizar:', err); }
+    }
+  });
+  
+  window.addEventListener('reminderSync', function(e) {
+    const data = e.detail;
+    const toast = document.querySelector(`[data-event-id="${data.eventId}"]`);
+    if (toast) {
+      closeReminderToast(toast, null, true, true);
+    }
+  });
 
   function gapiLoaded() { gapi.load('client', initializeGapiClient); }
   async function initializeGapiClient() {
@@ -450,7 +522,6 @@
     document.getElementById('login-btn').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'inline-block';
     document.getElementById('auth-status').textContent = "✅ Conectado";
-    requestNotificationPermission(); // Solicita permissão para notificações nativas
     load();
     startReminderCheck();
   }
@@ -468,7 +539,7 @@
   function startReminderCheck() {
     stopReminderCheck();
     checkUpcomingEvents();
-    reminderCheckInterval = setInterval(checkUpcomingEvents, 10000); // A cada 10 segundos
+    reminderCheckInterval = setInterval(checkUpcomingEvents, 10000);
   }
   
   function stopReminderCheck() {
@@ -483,6 +554,10 @@
     
     allEvents.forEach(function(ev) {
       if (!ev.id || ev.allDay) return;
+      
+      // Verifica se outra máquina já interagiu
+      const syncData = checkReminderSync(ev.id);
+      if (syncData) return; // Já foi processado por outra máquina
       
       const eventId = ev.id;
       const eventStart = ev.start.getTime();
@@ -504,15 +579,23 @@
     });
   }
   
+  function getEventColorClass(ev) {
+    if (ev.customColor && COLOR_MAP[ev.customColor]) {
+      return COLOR_MAP[ev.customColor].toastClass;
+    }
+    // Detecta cor baseada na agenda
+    if (ev.src.id === CAL.t.sources[0].id) return 'color-purple';
+    return 'color-blue'; // padrão
+  }
+  
   function showReminderToast(ev, rs, minutesUntil) {
     const container = document.getElementById('reminder-container');
     const existingToast = container.querySelector(`[data-event-id="${ev.id}"]`);
     if (existingToast) existingToast.remove();
     
     const toast = document.createElement('div');
-    toast.className = 'teams-toast';
+    toast.className = 'teams-toast ' + getEventColorClass(ev);
     toast.dataset.eventId = ev.id;
-    toast.style.borderLeftColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '#6264a7';
     
     const timeText = minutesUntil === 0 ? 'Agora!' : 
                      minutesUntil < 60 ? `Em ${minutesUntil} min` :
@@ -544,13 +627,10 @@
     // Som de notificação
     playNotificationSound();
     
-    // Notificação nativa do SO (aparece mesmo com navegador minimizado)
-    showNativeNotification(ev, minutesUntil);
-    
     // Pisca o título da aba
     startTitleBlink(ev.title);
     
-    // Auto-fechar após 10 segundos
+    // Auto-fechar após 25 segundos
     const autoCloseTimer = setTimeout(() => {
       closeReminderToast(toast, rs, true);
     }, REMINDER_DISPLAY_TIME);
@@ -558,6 +638,7 @@
     toast.querySelector('[data-action="now"]').onclick = function() {
       clearTimeout(autoCloseTimer);
       rs.dismissed = true;
+      updateReminderSync(ev.id, 'dismissed');
       closeReminderToast(toast, rs, true);
     };
     
@@ -571,28 +652,44 @@
       else if (rs.nextTrigger === 5) rs.nextTrigger = 0;
       else rs.dismissed = true;
       
+      updateReminderSync(ev.id, 'snoozed');
       closeReminderToast(toast, rs, false);
     };
     
     toast.querySelector('[data-action="edit"]').onclick = function() {
       clearTimeout(autoCloseTimer);
+      updateReminderSync(ev.id, 'editing');
       closeReminderToast(toast, rs, false);
       const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
       openEditModal(key, ev);
     };
   }
   
-  function closeReminderToast(toast, rs, wasDismissed) {
-    toast.classList.add('closing');
+  function closeReminderToast(toast, rs, wasDismissed, fromSync = false) {
+    if (!fromSync) {
+      toast.classList.add('closing');
+    }
     setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
     
-    // Para de piscar o título apenas se foi dispensado ou se não há mais toasts
     if (wasDismissed || rs.dismissed) {
       setTimeout(() => {
         const container = document.getElementById('reminder-container');
         if (container.children.length === 0) stopTitleBlink();
       }, 400);
     }
+  }
+  
+  function startTitleBlink(message) {
+    stopTitleBlink();
+    let showMsg = true;
+    titleBlinkInterval = setInterval(function() {
+      document.title = showMsg ? `🔔 ${message}` : originalTitle;
+      showMsg = !showMsg;
+    }, 1000);
+  }
+  function stopTitleBlink() {
+    if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
+    document.title = originalTitle;
   }
 
   // ========== RESTO DO CÓDIGO (igual ao anterior) ==========
@@ -733,7 +830,7 @@
       var txtDesc = document.createElement('textarea'); txtDesc.id = 'edit-desc'; txtDesc.placeholder = 'Detalhes do evento...'; txtDesc.value = desc;
       fieldDesc.appendChild(lblDesc); fieldDesc.appendChild(txtDesc); body.appendChild(fieldDesc);
       var actions = document.createElement('div'); actions.className = 'postit-actions';
-      var btnSave = document.createElement('button'); btnSave.className = 'btn btn-primary'; btnSave.innerHTML = isEdit ? '💾 Salvar' : '➕ Criar'; btnSave.onclick = function() { saveEventFromModal(key); }; actions.appendChild(btnSave);
+      var btnSave = document.createElement('button'); btnSave.className = 'btn btn-primary'; btnSave.innerHTML = isEdit ? ' Salvar' : '➕ Criar'; btnSave.onclick = function() { saveEventFromModal(key); }; actions.appendChild(btnSave);
       var btnCancel = document.createElement('button'); btnCancel.className = 'btn btn-secondary'; btnCancel.textContent = 'Cancelar'; btnCancel.onclick = closeModal; actions.appendChild(btnCancel);
       if (isEdit) { var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '🗑️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel); }
       body.appendChild(actions);
