@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agenda FUNCIONAL | TECNICA</title>
+<!-- Favicon inline para evitar erro 404 -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
 <style>
   :root { --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#d9dde3; --accent:#1a73e8; --f:#0b8043; --t:#8e24aa; --today:#e8f0fe; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#16181d; --card:#1f2229; --text:#e8eaed; --muted:#9aa0a6; --line:#33373f; --today:#263449; }
-  }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16181d; --card:#1f2229; --text:#e8eaed; --muted:#9aa0a6; --line:#33373f; --today:#263449; } }
   * { box-sizing:border-box; }
   html, body { height:100%; margin:0; }
   body { display:flex; flex-direction:column; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:14px; }
@@ -22,11 +22,9 @@
   button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   button.f.on { background:var(--f); border-color:var(--f); }
   button.t.on { background:var(--t); border-color:var(--t); }
-  
   #auth-area { display: flex; gap: 10px; align-items: center; }
   #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; }
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
-
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .panel.hidden { display:none; }
@@ -70,48 +68,32 @@
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
 
+  /* MODAL POST-IT */
   #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  
-  #box { 
-    background: #fffef7; 
-    color: #1f2937; 
-    border-radius: 4px; 
-    max-width: 420px; 
-    width: 100%; 
-    max-height: 90vh; 
-    overflow-y: auto; 
-    padding: 0;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05);
-    animation: slideUp 0.25s ease;
-    position: relative;
-  }
+  #box { background: #fffef7; color: #1f2937; border-radius: 4px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05); animation: slideUp 0.25s ease; position: relative; }
   #box::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--accent); border-radius: 4px 4px 0 0; }
   #box.t::before { background: var(--t); }
   #box.f::before { background: var(--f); }
-  
   #box .postit-header { padding: 16px 20px 10px; border-bottom: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: flex-start; }
   #box .postit-header h2 { margin: 0; font-size: 1.15rem; font-weight: 700; color: #111827; flex: 1; }
   #box .postit-header .subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
   #box .close { background: rgba(0,0,0,0.06); border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #6b7280; margin: 0; padding: 0; flex-shrink: 0; }
   #box .close:hover { background: rgba(0,0,0,0.12); color: #111827; }
-  
   #box .postit-body { padding: 14px 20px 20px; }
   #box .field { margin-bottom: 12px; }
   #box .field label { display: block; font-size: 0.7rem; font-weight: 600; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
   #box .field input, #box .field select, #box .field textarea { width: 100%; padding: 8px 10px; border: 1.5px solid #e5e7eb; border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: #fff; color: #111827; transition: all 0.15s; }
   #box .field input:focus, #box .field select:focus, #box .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
   #box .field textarea { min-height: 70px; resize: vertical; }
-  
   #box .datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
   #box .datetime-row .field { margin-bottom: 0; }
   #box .datetime-row .field input, #box .datetime-row .field select { padding: 7px 8px; font-size: 0.85rem; }
   #box .time-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   #box .time-pair label { font-size: 0.65rem; color: #6b7280; margin-bottom: 3px; }
   #box .time-pair select { padding: 6px 4px; font-size: 0.85rem; }
-  
   #box .color-selector { display: flex; gap: 8px; margin-top: 6px; }
   #box .color-option { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; position: relative; }
   #box .color-option:hover { transform: scale(1.1); }
@@ -121,7 +103,6 @@
   #box .color-red { background: #d93025; }
   #box .color-blue { background: #1a73e8; }
   #box .color-orange { background: #e8710a; }
-  
   #box .postit-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1); }
   #box .btn { flex: 1; padding: 10px 14px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
   #box .btn-primary { background: #1a73e8; color: white; }
@@ -132,7 +113,6 @@
   #box .btn-danger:hover { background: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
   #box .btn-link { background: transparent; color: #1a73e8; text-decoration: none; border: 1.5px solid #1a73e8; }
   #box .btn-link:hover { background: #1a73e8; color: white; }
-  
   #box .event-meta { background: rgba(0,0,0,0.03); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.85rem; color: #4b5563; }
   #box .event-meta strong { color: #111827; }
   #box .desc-display { white-space: pre-wrap; background: rgba(0,0,0,0.02); padding: 12px; border-radius: 8px; border-left: 3px solid var(--accent); margin: 10px 0; font-size: 0.9rem; line-height: 1.5; }
@@ -142,94 +122,149 @@
   #box::-webkit-scrollbar-track { background: transparent; }
   #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 
-  /* ========== POPUP DE LEMBRETE ========== */
+  /* ========== POPUP ESTILO TEAMS ========== */
   #reminder-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
+    bottom: 16px;
+    right: 16px;
+    z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     pointer-events: none;
   }
   
-  .reminder-toast {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
-    padding: 0;
-    width: 340px;
-    max-width: 90vw;
+  .teams-toast {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+    width: 320px;
+    max-width: 92vw;
     pointer-events: auto;
-    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: teamsSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
-    border-left: 4px solid var(--accent);
+    border-left: 3px solid #6264a7;
+    font-family: 'Segoe UI', system-ui, sans-serif;
   }
   
-  @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
-  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes teamsSlideIn {
+    from { transform: translateX(360px) scale(0.95); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+  }
+  @keyframes teamsSlideOut {
+    from { transform: translateX(0) scale(1); opacity: 1; }
+    to { transform: translateX(360px) scale(0.95); opacity: 0; }
+  }
+  @keyframes bellRing {
+    0%, 100% { transform: rotate(0); }
+    10%, 30% { transform: rotate(-15deg); }
+    20%, 40% { transform: rotate(15deg); }
+    50% { transform: rotate(0); }
+  }
+  @keyframes progressShrink { from { width: 100%; } to { width: 0%; } }
   
-  .reminder-toast.closing { animation: slideOutRight 0.3s ease forwards; }
+  .teams-toast.closing { animation: teamsSlideOut 0.3s ease forwards; }
   
-  .reminder-header {
-    background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
-    color: white;
-    padding: 12px 16px;
+  .teams-header {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e5e7eb;
   }
-  .reminder-icon {
-    width: 32px; height: 32px;
-    background: rgba(255,255,255,0.2);
+  
+  .teams-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #6264a7 0%, #464775 100%);
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    animation: pulse 2s infinite;
-  }
-  .reminder-title { flex: 1; }
-  .reminder-title h4 { margin: 0; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; }
-  .reminder-title .time-badge { font-size: 0.7rem; opacity: 0.9; margin-top: 2px; display: block; }
-  
-  .reminder-body { padding: 14px 16px; }
-  .reminder-event-title { font-size: 1.05rem; font-weight: 700; color: #111827; margin: 0 0 6px 0; line-height: 1.3; }
-  .reminder-event-time { font-size: 0.85rem; color: #6b7280; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px; }
-  .reminder-event-desc { font-size: 0.85rem; color: #4b5563; margin: 0; line-height: 1.4; max-height: 60px; overflow: hidden; text-overflow: ellipsis; }
-  
-  .reminder-actions {
     display: flex;
-    gap: 6px;
-    padding: 10px 16px 14px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    animation: bellRing 2s ease-in-out;
+  }
+  
+  .teams-header-text { flex: 1; min-width: 0; }
+  .teams-header-text .app-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6264a7;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .teams-header-text .time-badge {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-top: 1px;
+  }
+  
+  .teams-body { padding: 10px 12px; }
+  .teams-event-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .teams-event-time {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .teams-event-desc {
+    font-size: 0.78rem;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.4;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  
+  .teams-actions {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px 10px;
     border-top: 1px solid #f3f4f6;
     background: #fafbfc;
   }
-  .reminder-btn {
+  
+  .teams-btn {
     flex: 1;
-    padding: 8px 6px;
+    padding: 6px 4px;
     border: none;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    font-family: inherit;
+    gap: 3px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
   }
-  .reminder-btn-now { background: #10b981; color: white; }
-  .reminder-btn-now:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(16,185,129,0.3); }
-  .reminder-btn-snooze { background: #f59e0b; color: white; }
-  .reminder-btn-snooze:hover { background: #d97706; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(245,158,11,0.3); }
-  .reminder-btn-edit { background: #6366f1; color: white; }
-  .reminder-btn-edit:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(99,102,241,0.3); }
+  .teams-btn-now { background: #10b981; color: white; }
+  .teams-btn-now:hover { background: #059669; }
+  .teams-btn-snooze { background: #f59e0b; color: white; }
+  .teams-btn-snooze:hover { background: #d97706; }
+  .teams-btn-edit { background: #6264a7; color: white; }
+  .teams-btn-edit:hover { background: #464775; }
   
-  .reminder-progress { height: 3px; background: #e5e7eb; position: relative; overflow: hidden; }
-  .reminder-progress-bar { height: 100%; background: linear-gradient(90deg, #1a73e8, #1557b0); width: 100%; animation: progressShrink 5s linear forwards; }
-  @keyframes progressShrink { from { width: 100%; } to { width: 0%; } }
+  .teams-progress { height: 2px; background: #e5e7eb; }
+  .teams-progress-bar { height: 100%; background: #6264a7; width: 100%; animation: progressShrink 10s linear forwards; }
 </style>
 </head>
 <body>
@@ -243,7 +278,7 @@
   </div>
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
   <div class="group">
@@ -271,12 +306,11 @@
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+  const REMINDER_DISPLAY_TIME = 10000; // 10 segundos
   
   let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
-  let reminderCheckInterval = null;
+  let reminderCheckInterval = null, titleBlinkInterval = null, originalTitle = document.title;
   const COLOR_MAP = { 'green': { colorId: '10', hex: '#0b8043', name: 'Verde' }, 'red': { colorId: '11', hex: '#d93025', name: 'Vermelho' }, 'blue': { colorId: '9', hex: '#1a73e8', name: 'Azul' }, 'orange': { colorId: '6', hex: '#e8710a', name: 'Laranja' } };
-  
-  // Estado dos lembretes: { eventId: { dismissed: false, nextTrigger: 15, snoozeCount: 0 } }
   const reminderState = {};
 
   var CAL = {
@@ -301,6 +335,75 @@
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
   function generateTimeOptions() { const hours = []; for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0')); return { hours, minutes: ['00', '15', '30', '45'] }; }
+
+  // ===== SOM DE NOTIFICAÇÃO (gerado via Web Audio API) =====
+  let audioCtx = null;
+  function playNotificationSound() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      // Dois "bips" estilo Teams
+      [0, 0.15].forEach(function(delay) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(0.3, now + delay + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.15);
+      });
+    } catch (e) { console.log('Audio não disponível'); }
+  }
+
+  // ===== NOTIFICAÇÃO NATIVA DO SO =====
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+  
+  function showNativeNotification(ev, minutesUntil) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    
+    const timeText = minutesUntil === 0 ? 'Agora!' : `Em ${minutesUntil} min`;
+    const n = new Notification('⏰ Lembrete de Evento', {
+      body: `${ev.title}\n${timeText} - ${hhmm(ev.start)}`,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📅</text></svg>',
+      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90"></text></svg>',
+      tag: 'reminder-' + ev.id,
+      requireInteraction: false,
+      silent: false
+    });
+    
+    n.onclick = function() {
+      window.focus();
+      const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
+      openEditModal(key, ev);
+      n.close();
+    };
+    
+    // Fecha automaticamente após 10s
+    setTimeout(function() { n.close(); }, REMINDER_DISPLAY_TIME);
+  }
+
+  // ===== PISCAR TÍTULO DA ABA =====
+  function startTitleBlink(message) {
+    stopTitleBlink();
+    let showMsg = true;
+    titleBlinkInterval = setInterval(function() {
+      document.title = showMsg ? `🔔 ${message}` : originalTitle;
+      showMsg = !showMsg;
+    }, 1000);
+  }
+  function stopTitleBlink() {
+    if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
+    document.title = originalTitle;
+  }
 
   function gapiLoaded() { gapi.load('client', initializeGapiClient); }
   async function initializeGapiClient() {
@@ -347,6 +450,7 @@
     document.getElementById('login-btn').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'inline-block';
     document.getElementById('auth-status').textContent = "✅ Conectado";
+    requestNotificationPermission(); // Solicita permissão para notificações nativas
     load();
     startReminderCheck();
   }
@@ -355,16 +459,16 @@
     sessionStorage.removeItem('gcal_access_token'); sessionStorage.removeItem('gcal_token_expiry');
     const token = gapi.client.getToken();
     if (token && token.access_token) {
-      google.accounts.oauth2.revoke(token.access_token, () => { gapi.client.setToken(null); isUserLoggedIn = false; stopReminderCheck(); location.reload(); });
-    } else { isUserLoggedIn = false; stopReminderCheck(); location.reload(); }
+      google.accounts.oauth2.revoke(token.access_token, () => { gapi.client.setToken(null); isUserLoggedIn = false; stopReminderCheck(); stopTitleBlink(); location.reload(); });
+    } else { isUserLoggedIn = false; stopReminderCheck(); stopTitleBlink(); location.reload(); }
   }
 
-  // ========== SISTEMA DE LEMBRETES CORRIGIDO ==========
+  // ========== SISTEMA DE LEMBRETES ==========
   
   function startReminderCheck() {
     stopReminderCheck();
-    checkUpcomingEvents(); // Verifica imediatamente
-    reminderCheckInterval = setInterval(checkUpcomingEvents, 15000); // Verifica a cada 15 segundos
+    checkUpcomingEvents();
+    reminderCheckInterval = setInterval(checkUpcomingEvents, 10000); // A cada 10 segundos
   }
   
   function stopReminderCheck() {
@@ -384,18 +488,13 @@
       const eventStart = ev.start.getTime();
       const minutesUntil = Math.round((eventStart - now.getTime()) / 60000);
       
-      // Inicializa estado se não existir
       if (!reminderState[eventId]) {
         reminderState[eventId] = { dismissed: false, nextTrigger: 15, snoozeCount: 0, lastShown: 0 };
       }
       
       const rs = reminderState[eventId];
-      
-      // Se foi dispensado, não mostra mais
       if (rs.dismissed) return;
       
-      // Verifica se deve mostrar o lembrete
-      // Mostra quando: minutesUntil <= nextTrigger E minutesUntil >= 0 E não foi mostrado recentemente (últimos 2 min)
       const timeSinceLastShow = (now.getTime() - rs.lastShown) / 60000;
       
       if (minutesUntil <= rs.nextTrigger && minutesUntil >= 0 && timeSinceLastShow > 2) {
@@ -407,88 +506,96 @@
   
   function showReminderToast(ev, rs, minutesUntil) {
     const container = document.getElementById('reminder-container');
-    
-    // Remove toast existente do mesmo evento se houver
     const existingToast = container.querySelector(`[data-event-id="${ev.id}"]`);
     if (existingToast) existingToast.remove();
     
     const toast = document.createElement('div');
-    toast.className = 'reminder-toast';
+    toast.className = 'teams-toast';
     toast.dataset.eventId = ev.id;
-    toast.style.borderLeftColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '#1a73e8';
+    toast.style.borderLeftColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '#6264a7';
     
     const timeText = minutesUntil === 0 ? 'Agora!' : 
-                     minutesUntil < 60 ? `Em ${minutesUntil} minuto${minutesUntil !== 1 ? 's' : ''}` :
+                     minutesUntil < 60 ? `Em ${minutesUntil} min` :
                      `Em ${Math.floor(minutesUntil/60)}h ${minutesUntil%60}min`;
     
     toast.innerHTML = `
-      <div class="reminder-header">
-        <div class="reminder-icon">⏰</div>
-        <div class="reminder-title">
-          <h4>Lembrete de Evento</h4>
-          <span class="time-badge">${timeText}</span>
+      <div class="teams-header">
+        <div class="teams-icon">🔔</div>
+        <div class="teams-header-text">
+          <div class="app-name">Agenda GTEK</div>
+          <div class="time-badge">${timeText} • ${hhmm(ev.start)}</div>
         </div>
       </div>
-      <div class="reminder-body">
-        <h3 class="reminder-event-title">${ev.title}</h3>
-        <p class="reminder-event-time">🕐 ${hhmm(ev.start)} - ${hhmm(ev.end)}</p>
-        ${ev.desc ? `<p class="reminder-event-desc">${ev.desc.substring(0, 100)}${ev.desc.length > 100 ? '...' : ''}</p>` : ''}
+      <div class="teams-body">
+        <h3 class="teams-event-title">${ev.title}</h3>
+        <p class="teams-event-time">🕐 ${hhmm(ev.start)} - ${hhmm(ev.end)}</p>
+        ${ev.desc ? `<p class="teams-event-desc">${ev.desc.substring(0, 80)}${ev.desc.length > 80 ? '...' : ''}</p>` : ''}
       </div>
-      <div class="reminder-actions">
-        <button class="reminder-btn reminder-btn-now" data-action="now">▶️ Agora</button>
-        <button class="reminder-btn reminder-btn-snooze" data-action="snooze">⏱️ +5min</button>
-        <button class="reminder-btn reminder-btn-edit" data-action="edit">✏️ Prorrogar</button>
+      <div class="teams-actions">
+        <button class="teams-btn teams-btn-now" data-action="now">▶ Agora</button>
+        <button class="teams-btn teams-btn-snooze" data-action="snooze">⏱ +5min</button>
+        <button class="teams-btn teams-btn-edit" data-action="edit">✏️ Editar</button>
       </div>
-      <div class="reminder-progress"><div class="reminder-progress-bar"></div></div>
+      <div class="teams-progress"><div class="teams-progress-bar"></div></div>
     `;
     
     container.appendChild(toast);
     
-    // Auto-fechar após 5 segundos
-    const autoCloseTimer = setTimeout(() => closeReminderToast(toast), 5000);
+    // Som de notificação
+    playNotificationSound();
     
-    // Botão "Agora" - marca como dispensado
+    // Notificação nativa do SO (aparece mesmo com navegador minimizado)
+    showNativeNotification(ev, minutesUntil);
+    
+    // Pisca o título da aba
+    startTitleBlink(ev.title);
+    
+    // Auto-fechar após 10 segundos
+    const autoCloseTimer = setTimeout(() => {
+      closeReminderToast(toast, rs, true);
+    }, REMINDER_DISPLAY_TIME);
+    
     toast.querySelector('[data-action="now"]').onclick = function() {
       clearTimeout(autoCloseTimer);
       rs.dismissed = true;
-      closeReminderToast(toast);
+      closeReminderToast(toast, rs, true);
     };
     
-    // Botão "+5min" - agenda próximo lembrete
     toast.querySelector('[data-action="snooze"]').onclick = function() {
       clearTimeout(autoCloseTimer);
       rs.snoozeCount++;
-      rs.lastShown = 0; // Permite mostrar novamente imediatamente
+      rs.lastShown = 0;
       
-      // Lógica: 15min → 10min → 5min → 0min (hora do evento)
-      if (rs.nextTrigger === 15) {
-        rs.nextTrigger = 10;
-      } else if (rs.nextTrigger === 10) {
-        rs.nextTrigger = 5;
-      } else if (rs.nextTrigger === 5) {
-        rs.nextTrigger = 0; // Última vez: na hora exata
-      } else {
-        rs.dismissed = true; // Já mostrou na hora, não mostra mais
-      }
+      if (rs.nextTrigger === 15) rs.nextTrigger = 10;
+      else if (rs.nextTrigger === 10) rs.nextTrigger = 5;
+      else if (rs.nextTrigger === 5) rs.nextTrigger = 0;
+      else rs.dismissed = true;
       
-      closeReminderToast(toast);
+      closeReminderToast(toast, rs, false);
     };
     
-    // Botão "Prorrogar" - abre modal de edição
     toast.querySelector('[data-action="edit"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      closeReminderToast(toast);
+      closeReminderToast(toast, rs, false);
       const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
       openEditModal(key, ev);
     };
   }
   
-  function closeReminderToast(toast) {
+  function closeReminderToast(toast, rs, wasDismissed) {
     toast.classList.add('closing');
     setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    
+    // Para de piscar o título apenas se foi dispensado ou se não há mais toasts
+    if (wasDismissed || rs.dismissed) {
+      setTimeout(() => {
+        const container = document.getElementById('reminder-container');
+        if (container.children.length === 0) stopTitleBlink();
+      }, 400);
+    }
   }
 
-  // ========== RESTO DO CÓDIGO ==========
+  // ========== RESTO DO CÓDIGO (igual ao anterior) ==========
   
   function getRange() {
     var c = state.cursor, s;
@@ -501,6 +608,7 @@
     if (state.mode === "MONTH") t = c.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
     else { var r = getRange(), e = addDays(r.end, -1); t = r.start.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" }); }
     document.getElementById("title").textContent = t;
+    originalTitle = document.title;
   }
   function norm(it, src) {
     var allDay = !!it.start.date, s, e;
@@ -627,7 +735,7 @@
       var actions = document.createElement('div'); actions.className = 'postit-actions';
       var btnSave = document.createElement('button'); btnSave.className = 'btn btn-primary'; btnSave.innerHTML = isEdit ? '💾 Salvar' : '➕ Criar'; btnSave.onclick = function() { saveEventFromModal(key); }; actions.appendChild(btnSave);
       var btnCancel = document.createElement('button'); btnCancel.className = 'btn btn-secondary'; btnCancel.textContent = 'Cancelar'; btnCancel.onclick = closeModal; actions.appendChild(btnCancel);
-      if (isEdit) { var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel); }
+      if (isEdit) { var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '🗑️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel); }
       body.appendChild(actions);
     });
   }
