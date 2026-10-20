@@ -70,7 +70,6 @@
   .list .row:hover { background:var(--line); }
   .list .hr { width:90px; flex:none; color:var(--muted); }
 
-  /* ========== MODAL POST-IT ========== */
   #ov { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; animation: fadeIn 0.2s ease; }
   #ov.show { display:flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -89,169 +88,42 @@
     animation: slideUp 0.25s ease;
     position: relative;
   }
-  #box::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 4px 4px 0 0;
-  }
+  #box::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--accent); border-radius: 4px 4px 0 0; }
   #box.t::before { background: var(--t); }
   #box.f::before { background: var(--f); }
   
-  #box .postit-header {
-    padding: 16px 20px 10px;
-    border-bottom: 1px dashed rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  #box .postit-header h2 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #111827;
-    flex: 1;
-  }
-  #box .postit-header .subtitle {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 3px;
-    font-weight: 500;
-  }
-  #box .close {
-    background: rgba(0,0,0,0.06);
-    border: none;
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6b7280;
-    margin: 0; padding: 0;
-    flex-shrink: 0;
-  }
+  #box .postit-header { padding: 16px 20px 10px; border-bottom: 1px dashed rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: flex-start; }
+  #box .postit-header h2 { margin: 0; font-size: 1.15rem; font-weight: 700; color: #111827; flex: 1; }
+  #box .postit-header .subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
+  #box .close { background: rgba(0,0,0,0.06); border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #6b7280; margin: 0; padding: 0; flex-shrink: 0; }
   #box .close:hover { background: rgba(0,0,0,0.12); color: #111827; }
   
   #box .postit-body { padding: 14px 20px 20px; }
-  
   #box .field { margin-bottom: 12px; }
-  #box .field label {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  #box .field input,
-  #box .field select,
-  #box .field textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-family: inherit;
-    background: #fff;
-    color: #111827;
-    transition: all 0.15s;
-  }
-  #box .field input:focus,
-  #box .field select:focus,
-  #box .field textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
-  }
+  #box .field label { display: block; font-size: 0.7rem; font-weight: 600; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #box .field input, #box .field select, #box .field textarea { width: 100%; padding: 8px 10px; border: 1.5px solid #e5e7eb; border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: #fff; color: #111827; transition: all 0.15s; }
+  #box .field input:focus, #box .field select:focus, #box .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
   #box .field textarea { min-height: 70px; resize: vertical; }
   
-  #box .datetime-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+  #box .datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
   #box .datetime-row .field { margin-bottom: 0; }
-  #box .datetime-row .field input,
-  #box .datetime-row .field select {
-    padding: 7px 8px;
-    font-size: 0.85rem;
-  }
-  #box .time-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-  #box .time-pair label {
-    font-size: 0.65rem;
-    color: #6b7280;
-    margin-bottom: 3px;
-  }
-  #box .time-pair select {
-    padding: 6px 4px;
-    font-size: 0.85rem;
-  }
+  #box .datetime-row .field input, #box .datetime-row .field select { padding: 7px 8px; font-size: 0.85rem; }
+  #box .time-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #box .time-pair label { font-size: 0.65rem; color: #6b7280; margin-bottom: 3px; }
+  #box .time-pair select { padding: 6px 4px; font-size: 0.85rem; }
   
-  #box .color-selector {
-    display: flex;
-    gap: 8px;
-    margin-top: 6px;
-  }
-  #box .color-option {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-  }
+  #box .color-selector { display: flex; gap: 8px; margin-top: 6px; }
+  #box .color-option { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; position: relative; }
   #box .color-option:hover { transform: scale(1.1); }
-  #box .color-option.selected {
-    border-color: #111827;
-    transform: scale(1.15);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  #box .color-option.selected::after {
-    content: "✓";
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  }
+  #box .color-option.selected { border-color: #111827; transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  #box .color-option.selected::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   #box .color-green { background: #0b8043; }
   #box .color-red { background: #d93025; }
   #box .color-blue { background: #1a73e8; }
   #box .color-orange { background: #e8710a; }
   
-  #box .postit-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px dashed rgba(0,0,0,0.1);
-  }
-  #box .btn {
-    flex: 1;
-    padding: 10px 14px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
+  #box .postit-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1); }
+  #box .btn { flex: 1; padding: 10px 14px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
   #box .btn-primary { background: #1a73e8; color: white; }
   #box .btn-primary:hover { background: #1557b0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
   #box .btn-secondary { background: #f3f4f6; color: #374151; }
@@ -261,34 +133,16 @@
   #box .btn-link { background: transparent; color: #1a73e8; text-decoration: none; border: 1.5px solid #1a73e8; }
   #box .btn-link:hover { background: #1a73e8; color: white; }
   
-  #box .event-meta {
-    background: rgba(0,0,0,0.03);
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 14px;
-    font-size: 0.85rem;
-    color: #4b5563;
-  }
+  #box .event-meta { background: rgba(0,0,0,0.03); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.85rem; color: #4b5563; }
   #box .event-meta strong { color: #111827; }
-  
-  #box .desc-display {
-    white-space: pre-wrap;
-    background: rgba(0,0,0,0.02);
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 3px solid var(--accent);
-    margin: 10px 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
+  #box .desc-display { white-space: pre-wrap; background: rgba(0,0,0,0.02); padding: 12px; border-radius: 8px; border-left: 3px solid var(--accent); margin: 10px 0; font-size: 0.9rem; line-height: 1.5; }
   #box.t .desc-display { border-left-color: var(--t); }
   #box.f .desc-display { border-left-color: var(--f); }
-  
   #box::-webkit-scrollbar { width: 6px; }
   #box::-webkit-scrollbar-track { background: transparent; }
   #box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 
-  /* ========== POPUP DE LEMBRETE (NOTIFICATION TOAST) ========== */
+  /* ========== POPUP DE LEMBRETE ========== */
   #reminder-container {
     position: fixed;
     bottom: 20px;
@@ -313,22 +167,11 @@
     border-left: 4px solid var(--accent);
   }
   
-  @keyframes slideInRight {
-    from { transform: translateX(400px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  @keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(400px); opacity: 0; }
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
+  @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
   
-  .reminder-toast.closing {
-    animation: slideOutRight 0.3s ease forwards;
-  }
+  .reminder-toast.closing { animation: slideOutRight 0.3s ease forwards; }
   
   .reminder-header {
     background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
@@ -338,67 +181,22 @@
     align-items: center;
     gap: 10px;
   }
-  
   .reminder-icon {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     background: rgba(255,255,255,0.2);
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 18px;
     animation: pulse 2s infinite;
   }
+  .reminder-title { flex: 1; }
+  .reminder-title h4 { margin: 0; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; }
+  .reminder-title .time-badge { font-size: 0.7rem; opacity: 0.9; margin-top: 2px; display: block; }
   
-  .reminder-title {
-    flex: 1;
-  }
-  
-  .reminder-title h4 {
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-  
-  .reminder-title .time-badge {
-    font-size: 0.7rem;
-    opacity: 0.9;
-    margin-top: 2px;
-    display: block;
-  }
-  
-  .reminder-body {
-    padding: 14px 16px;
-  }
-  
-  .reminder-event-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 6px 0;
-    line-height: 1.3;
-  }
-  
-  .reminder-event-time {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin: 0 0 8px 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .reminder-event-desc {
-    font-size: 0.85rem;
-    color: #4b5563;
-    margin: 0;
-    line-height: 1.4;
-    max-height: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .reminder-body { padding: 14px 16px; }
+  .reminder-event-title { font-size: 1.05rem; font-weight: 700; color: #111827; margin: 0 0 6px 0; line-height: 1.3; }
+  .reminder-event-time { font-size: 0.85rem; color: #6b7280; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px; }
+  .reminder-event-desc { font-size: 0.85rem; color: #4b5563; margin: 0; line-height: 1.4; max-height: 60px; overflow: hidden; text-overflow: ellipsis; }
   
   .reminder-actions {
     display: flex;
@@ -407,7 +205,6 @@
     border-top: 1px solid #f3f4f6;
     background: #fafbfc;
   }
-  
   .reminder-btn {
     flex: 1;
     padding: 8px 6px;
@@ -423,55 +220,16 @@
     gap: 4px;
     font-family: inherit;
   }
+  .reminder-btn-now { background: #10b981; color: white; }
+  .reminder-btn-now:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(16,185,129,0.3); }
+  .reminder-btn-snooze { background: #f59e0b; color: white; }
+  .reminder-btn-snooze:hover { background: #d97706; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(245,158,11,0.3); }
+  .reminder-btn-edit { background: #6366f1; color: white; }
+  .reminder-btn-edit:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(99,102,241,0.3); }
   
-  .reminder-btn-now {
-    background: #10b981;
-    color: white;
-  }
-  .reminder-btn-now:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(16,185,129,0.3);
-  }
-  
-  .reminder-btn-snooze {
-    background: #f59e0b;
-    color: white;
-  }
-  .reminder-btn-snooze:hover {
-    background: #d97706;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(245,158,11,0.3);
-  }
-  
-  .reminder-btn-edit {
-    background: #6366f1;
-    color: white;
-  }
-  .reminder-btn-edit:hover {
-    background: #4f46e5;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(99,102,241,0.3);
-  }
-  
-  .reminder-progress {
-    height: 3px;
-    background: #e5e7eb;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .reminder-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #1a73e8, #1557b0);
-    width: 100%;
-    animation: progressShrink 5s linear forwards;
-  }
-  
-  @keyframes progressShrink {
-    from { width: 100%; }
-    to { width: 0%; }
-  }
+  .reminder-progress { height: 3px; background: #e5e7eb; position: relative; overflow: hidden; }
+  .reminder-progress-bar { height: 100%; background: linear-gradient(90deg, #1a73e8, #1557b0); width: 100%; animation: progressShrink 5s linear forwards; }
+  @keyframes progressShrink { from { width: 100%; } to { width: 0%; } }
 </style>
 </head>
 <body>
@@ -483,13 +241,11 @@
     <button id="next" aria-label="Próximo">&rsaquo;</button>
     <span id="title"></span>
   </div>
-  
   <div class="group push" id="auth-area">
     <span id="auth-status" class="lbl">Carregando sistema...</span>
-    <button id="login-btn" onclick="handleAuthClick()"> Entrar com Google</button>
+    <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
   </div>
-
   <div class="group">
     <span class="lbl">Mostrar:</span>
     <button class="f" data-show="f">FUNCIONAL</button>
@@ -510,29 +266,17 @@
 </main>
 
 <div id="ov"><div id="box"></div></div>
-
-<!-- Container de lembretes -->
 <div id="reminder-container"></div>
 
 <script>
   const CLIENT_ID = '662961735746-22gc3p8a69qjc4o2ul3g5om3ov5aaovi.apps.googleusercontent.com';
   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
   
-  let tokenClient;
-  let gapiInited = false;
-  let gisInited = false;
-  let currentEditEvent = null;
-  let isUserLoggedIn = false;
+  let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
   let reminderCheckInterval = null;
-
-  const COLOR_MAP = {
-    'green':  { colorId: '10', hex: '#0b8043', name: 'Verde' },
-    'red':    { colorId: '11', hex: '#d93025', name: 'Vermelho' },
-    'blue':   { colorId: '9',  hex: '#1a73e8', name: 'Azul' },
-    'orange': { colorId: '6',  hex: '#e8710a', name: 'Laranja' }
-  };
-
-  // Estado dos lembretes (em memória - reseta ao fechar o navegador)
+  const COLOR_MAP = { 'green': { colorId: '10', hex: '#0b8043', name: 'Verde' }, 'red': { colorId: '11', hex: '#d93025', name: 'Vermelho' }, 'blue': { colorId: '9', hex: '#1a73e8', name: 'Azul' }, 'orange': { colorId: '6', hex: '#e8710a', name: 'Laranja' } };
+  
+  // Estado dos lembretes: { eventId: { dismissed: false, nextTrigger: 15, snoozeCount: 0 } }
   const reminderState = {};
 
   var CAL = {
@@ -544,91 +288,60 @@
       { name: "Implantação", id: "classroom112528712237241703198@group.calendar.google.com", color: "#1a73e8" },
       { name: "Treinamentos Xap", id: "jnieb411k2g5ikmrkt4bdoupk0@group.calendar.google.com", color: "#5d4037" }
     ] },
-    t: { name: "TECNICA", sources: [
-      { name: "Principal", id: "tigteksm@gmail.com", color: "#8e24aa" }
-    ] }
+    t: { name: "TECNICA", sources: [ { name: "Principal", id: "tigteksm@gmail.com", color: "#8e24aa" } ] }
   };
   var state = { show: "ft", mode: "MONTH", cursor: sod(new Date()), seq: 0, hidden: {}, data: {}, errs: {} };
   try { state.hidden = JSON.parse(localStorage.getItem("agenda_hidden") || "{}") || {}; } catch (e) {}
   function saveHidden() { try { localStorage.setItem("agenda_hidden", JSON.stringify(state.hidden)); } catch (e) {} }
   function many(key) { return CAL[key].sources.length > 1; }
-
   function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
   function same(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
-
-  function generateTimeOptions() {
-    const hours = [];
-    for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0'));
-    const minutes = ['00', '15', '30', '45'];
-    return { hours, minutes };
-  }
+  function generateTimeOptions() { const hours = []; for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0')); return { hours, minutes: ['00', '15', '30', '45'] }; }
 
   function gapiLoaded() { gapi.load('client', initializeGapiClient); }
   async function initializeGapiClient() {
     try {
       await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] });
-      gapiInited = true;
-      maybeEnableButtons();
-      checkSavedSession();
-    } catch (err) {
-      console.error("Erro ao iniciar GAPI:", err);
-      document.getElementById('auth-status').textContent = "Erro ao carregar API.";
-    }
+      gapiInited = true; maybeEnableButtons(); checkSavedSession();
+    } catch (err) { console.error("Erro GAPI:", err); document.getElementById('auth-status').textContent = "Erro ao carregar API."; }
   }
-  
   function gisLoaded() {
     try {
       tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
+        client_id: CLIENT_ID, scope: SCOPES,
         callback: (resp) => {
           if (resp.error) { alert("Erro no login: " + resp.error); return; }
           sessionStorage.setItem('gcal_access_token', resp.access_token);
           sessionStorage.setItem('gcal_token_expiry', Date.now() + (resp.expires_in * 1000));
           onLoginSuccess();
-        },
+        }
       });
-      gisInited = true;
-      maybeEnableButtons();
-      checkSavedSession();
-    } catch (err) {
-      console.error("Erro ao iniciar GIS:", err);
-      document.getElementById('auth-status').textContent = "Erro: Client ID inválido.";
-    }
+      gisInited = true; maybeEnableButtons(); checkSavedSession();
+    } catch (err) { console.error("Erro GIS:", err); document.getElementById('auth-status').textContent = "Erro: Client ID inválido."; }
   }
-
   function maybeEnableButtons() {
     if (gapiInited && gisInited) {
       document.getElementById('auth-status').style.display = 'none';
       if (!isUserLoggedIn) document.getElementById('login-btn').style.display = 'inline-block';
     }
   }
-
   function checkSavedSession() {
     if (!gapiInited || !gisInited) return;
     const savedToken = sessionStorage.getItem('gcal_access_token');
     const savedExpiry = sessionStorage.getItem('gcal_token_expiry');
     if (savedToken && savedExpiry) {
-      const now = Date.now();
-      const expiry = parseInt(savedExpiry);
-      if (now < expiry - 300000) {
-        gapi.client.setToken({ access_token: savedToken });
-        onLoginSuccess();
-        return;
-      } else {
-        sessionStorage.removeItem('gcal_access_token');
-        sessionStorage.removeItem('gcal_token_expiry');
-      }
+      const now = Date.now(), expiry = parseInt(savedExpiry);
+      if (now < expiry - 300000) { gapi.client.setToken({ access_token: savedToken }); onLoginSuccess(); return; }
+      else { sessionStorage.removeItem('gcal_access_token'); sessionStorage.removeItem('gcal_token_expiry'); }
     }
     document.getElementById('login-btn').style.display = 'inline-block';
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('auth-status').textContent = 'Faça login para acessar sua agenda.';
   }
-
   function onLoginSuccess() {
     isUserLoggedIn = true;
     document.getElementById('login-btn').style.display = 'none';
@@ -637,40 +350,25 @@
     load();
     startReminderCheck();
   }
-
   function handleAuthClick() { tokenClient.requestAccessToken({prompt: 'consent'}); }
-
   function handleSignoutClick() {
-    sessionStorage.removeItem('gcal_access_token');
-    sessionStorage.removeItem('gcal_token_expiry');
+    sessionStorage.removeItem('gcal_access_token'); sessionStorage.removeItem('gcal_token_expiry');
     const token = gapi.client.getToken();
     if (token && token.access_token) {
-      google.accounts.oauth2.revoke(token.access_token, () => {
-        gapi.client.setToken(null);
-        isUserLoggedIn = false;
-        stopReminderCheck();
-        location.reload();
-      });
-    } else {
-      isUserLoggedIn = false;
-      stopReminderCheck();
-      location.reload();
-    }
+      google.accounts.oauth2.revoke(token.access_token, () => { gapi.client.setToken(null); isUserLoggedIn = false; stopReminderCheck(); location.reload(); });
+    } else { isUserLoggedIn = false; stopReminderCheck(); location.reload(); }
   }
 
-  // ========== SISTEMA DE LEMBRETES ==========
+  // ========== SISTEMA DE LEMBRETES CORRIGIDO ==========
   
   function startReminderCheck() {
     stopReminderCheck();
-    checkUpcomingEvents();
-    reminderCheckInterval = setInterval(checkUpcomingEvents, 30000); // Verifica a cada 30 segundos
+    checkUpcomingEvents(); // Verifica imediatamente
+    reminderCheckInterval = setInterval(checkUpcomingEvents, 15000); // Verifica a cada 15 segundos
   }
   
   function stopReminderCheck() {
-    if (reminderCheckInterval) {
-      clearInterval(reminderCheckInterval);
-      reminderCheckInterval = null;
-    }
+    if (reminderCheckInterval) { clearInterval(reminderCheckInterval); reminderCheckInterval = null; }
   }
   
   function checkUpcomingEvents() {
@@ -680,41 +378,48 @@
     const allEvents = [...(state.data.f || []), ...(state.data.t || [])];
     
     allEvents.forEach(function(ev) {
-      if (!ev.id || ev.allDay) return; // Ignora eventos sem id ou dia inteiro
+      if (!ev.id || ev.allDay) return;
       
       const eventId = ev.id;
       const eventStart = ev.start.getTime();
-      const minutesUntil = (eventStart - now.getTime()) / 60000;
+      const minutesUntil = Math.round((eventStart - now.getTime()) / 60000);
       
-      // Inicializa estado do lembrete se não existir
+      // Inicializa estado se não existir
       if (!reminderState[eventId]) {
-        reminderState[eventId] = {
-          shown: false,
-          snoozeCount: 0,
-          nextReminder: 15 // Primeiro lembrete aos 15 minutos
-        };
+        reminderState[eventId] = { dismissed: false, nextTrigger: 15, snoozeCount: 0, lastShown: 0 };
       }
       
       const rs = reminderState[eventId];
       
+      // Se foi dispensado, não mostra mais
+      if (rs.dismissed) return;
+      
       // Verifica se deve mostrar o lembrete
-      if (minutesUntil <= rs.nextReminder && minutesUntil > 0 && !rs.shown) {
-        showReminderToast(ev, rs);
-        rs.shown = true;
+      // Mostra quando: minutesUntil <= nextTrigger E minutesUntil >= 0 E não foi mostrado recentemente (últimos 2 min)
+      const timeSinceLastShow = (now.getTime() - rs.lastShown) / 60000;
+      
+      if (minutesUntil <= rs.nextTrigger && minutesUntil >= 0 && timeSinceLastShow > 2) {
+        showReminderToast(ev, rs, minutesUntil);
+        rs.lastShown = now.getTime();
       }
     });
   }
   
-  function showReminderToast(ev, rs) {
+  function showReminderToast(ev, rs, minutesUntil) {
     const container = document.getElementById('reminder-container');
+    
+    // Remove toast existente do mesmo evento se houver
+    const existingToast = container.querySelector(`[data-event-id="${ev.id}"]`);
+    if (existingToast) existingToast.remove();
+    
     const toast = document.createElement('div');
     toast.className = 'reminder-toast';
+    toast.dataset.eventId = ev.id;
     toast.style.borderLeftColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '#1a73e8';
     
-    const minutesUntil = Math.round((ev.start.getTime() - new Date().getTime()) / 60000);
-    const timeText = minutesUntil >= 60 ? 
-      `Em ${Math.floor(minutesUntil/60)}h ${minutesUntil%60}min` : 
-      `Em ${minutesUntil} minutos`;
+    const timeText = minutesUntil === 0 ? 'Agora!' : 
+                     minutesUntil < 60 ? `Em ${minutesUntil} minuto${minutesUntil !== 1 ? 's' : ''}` :
+                     `Em ${Math.floor(minutesUntil/60)}h ${minutesUntil%60}min`;
     
     toast.innerHTML = `
       <div class="reminder-header">
@@ -730,68 +435,61 @@
         ${ev.desc ? `<p class="reminder-event-desc">${ev.desc.substring(0, 100)}${ev.desc.length > 100 ? '...' : ''}</p>` : ''}
       </div>
       <div class="reminder-actions">
-        <button class="reminder-btn reminder-btn-now" data-action="now">
-          ▶️ Agora
-        </button>
-        <button class="reminder-btn reminder-btn-snooze" data-action="snooze">
-          ⏱️ +5min
-        </button>
-        <button class="reminder-btn reminder-btn-edit" data-action="edit">
-          ️ Prorrogar
-        </button>
+        <button class="reminder-btn reminder-btn-now" data-action="now">▶️ Agora</button>
+        <button class="reminder-btn reminder-btn-snooze" data-action="snooze">⏱️ +5min</button>
+        <button class="reminder-btn reminder-btn-edit" data-action="edit">✏️ Prorrogar</button>
       </div>
-      <div class="reminder-progress">
-        <div class="reminder-progress-bar"></div>
-      </div>
+      <div class="reminder-progress"><div class="reminder-progress-bar"></div></div>
     `;
     
     container.appendChild(toast);
     
     // Auto-fechar após 5 segundos
-    const autoCloseTimer = setTimeout(() => {
-      closeReminderToast(toast, ev, rs);
-    }, 5000);
+    const autoCloseTimer = setTimeout(() => closeReminderToast(toast), 5000);
     
-    // Botões de ação
+    // Botão "Agora" - marca como dispensado
     toast.querySelector('[data-action="now"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      rs.shown = true; // Não mostra mais
-      closeReminderToast(toast, ev, rs);
+      rs.dismissed = true;
+      closeReminderToast(toast);
     };
     
+    // Botão "+5min" - agenda próximo lembrete
     toast.querySelector('[data-action="snooze"]').onclick = function() {
       clearTimeout(autoCloseTimer);
       rs.snoozeCount++;
-      rs.shown = false; // Permite mostrar novamente
+      rs.lastShown = 0; // Permite mostrar novamente imediatamente
       
-      if (rs.snoozeCount === 1) {
-        rs.nextReminder = 10; // Próximo em 10 minutos
-      } else if (rs.snoozeCount >= 2) {
-        rs.nextReminder = 5; // Último em 5 minutos
+      // Lógica: 15min → 10min → 5min → 0min (hora do evento)
+      if (rs.nextTrigger === 15) {
+        rs.nextTrigger = 10;
+      } else if (rs.nextTrigger === 10) {
+        rs.nextTrigger = 5;
+      } else if (rs.nextTrigger === 5) {
+        rs.nextTrigger = 0; // Última vez: na hora exata
+      } else {
+        rs.dismissed = true; // Já mostrou na hora, não mostra mais
       }
       
-      closeReminderToast(toast, ev, rs);
+      closeReminderToast(toast);
     };
     
+    // Botão "Prorrogar" - abre modal de edição
     toast.querySelector('[data-action="edit"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      closeReminderToast(toast, ev, rs);
-      // Abre o modal de edição
-      openEditModal(ev.src.name === 'Principal' && ev.src.id === CAL.t.sources[0].id ? 't' : 'f', ev);
+      closeReminderToast(toast);
+      const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
+      openEditModal(key, ev);
     };
   }
   
-  function closeReminderToast(toast, ev, rs) {
+  function closeReminderToast(toast) {
     toast.classList.add('closing');
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    }, 300);
+    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
   }
 
   // ========== RESTO DO CÓDIGO ==========
-
+  
   function getRange() {
     var c = state.cursor, s;
     if (state.mode === "MONTH") { var f = new Date(c.getFullYear(), c.getMonth(), 1); s = addDays(f, -f.getDay()); return { start: s, end: addDays(s, 42) }; }
@@ -801,516 +499,190 @@
   function setTitle() {
     var c = state.cursor, t;
     if (state.mode === "MONTH") t = c.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-    else {
-      var r = getRange(), e = addDays(r.end, -1);
-      t = r.start.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
-    }
+    else { var r = getRange(), e = addDays(r.end, -1); t = r.start.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" }); }
     document.getElementById("title").textContent = t;
   }
-
   function norm(it, src) {
     var allDay = !!it.start.date, s, e;
     if (allDay) { var a = it.start.date.split("-"), b = it.end.date.split("-"); s = new Date(+a[0], a[1] - 1, +a[2]); e = new Date(+b[0], b[1] - 1, +b[2]); }
     else { s = new Date(it.start.dateTime); e = new Date(it.end.dateTime); }
-    var customColor = null;
-    var desc = it.description || "";
+    var customColor = null, desc = it.description || "";
     var colorMatch = desc.match(/\[COLOR:(\w+)\]/);
-    if (colorMatch) {
-      customColor = colorMatch[1];
-      desc = desc.replace(/\[COLOR:\w+\]\s*/, '').trim();
-    }
-    return { 
-      id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, 
-      loc: it.location || "", desc: desc, src: src, etag: it.etag, colorId: it.colorId, customColor: customColor
-    };
+    if (colorMatch) { customColor = colorMatch[1]; desc = desc.replace(/\[COLOR:\w+\]\s*/, '').trim(); }
+    return { id: it.id, title: it.summary || "(sem título)", allDay: allDay, start: s, end: e, loc: it.location || "", desc: desc, src: src, etag: it.etag, colorId: it.colorId, customColor: customColor };
   }
-  
   function fetchSource(src, r) {
-    return gapi.client.calendar.events.list({
-      calendarId: src.id, timeMin: r.start.toISOString(), timeMax: r.end.toISOString(),
-      singleEvents: true, orderBy: 'startTime', maxResults: 2500
-    }).then(function(response) {
-      return (response.result.items || []).filter(function(i) { 
-        return i.status !== 'cancelled' && i.start && i.end; 
-      }).map(function(i) { return norm(i, src); });
-    }).catch(function(err) {
-      throw new Error(err.result ? err.result.error.message : err.message);
-    });
+    return gapi.client.calendar.events.list({ calendarId: src.id, timeMin: r.start.toISOString(), timeMax: r.end.toISOString(), singleEvents: true, orderBy: 'startTime', maxResults: 2500 })
+    .then(function(response) { return (response.result.items || []).filter(function(i) { return i.status !== 'cancelled' && i.start && i.end; }).map(function(i) { return norm(i, src); }); })
+    .catch(function(err) { throw new Error(err.result ? err.result.error.message : err.message); });
   }
-
-  function onDay(evs, day) {
-    var s = day.getTime(), e = addDays(day, 1).getTime();
-    return evs.filter(function (v) { return v.start.getTime() < e && v.end.getTime() > s; })
-      .sort(function (a, b) { return (b.allDay - a.allDay) || (a.start - b.start); });
-  }
-
-  function linkify(parent, text) {
-    text.split(/(https?:\/\/[^\s]+)/g).forEach(function (p) {
-      if (/^https?:\/\//.test(p)) { var a = el("a", null, p); a.href = p; a.target = "_blank"; a.rel = "noopener"; parent.appendChild(a); }
-      else parent.appendChild(document.createTextNode(p));
-    });
-  }
-  function plain(html) {
-    var t = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
-    return (new DOMParser().parseFromString(t, "text/html").body.textContent || "").trim();
-  }
-  function closeModal() { 
-    document.getElementById("ov").classList.remove("show"); 
-    currentEditEvent = null;
-  }
-  
+  function onDay(evs, day) { var s = day.getTime(), e = addDays(day, 1).getTime(); return evs.filter(function (v) { return v.start.getTime() < e && v.end.getTime() > s; }).sort(function (a, b) { return (b.allDay - a.allDay) || (a.start - b.start); }); }
+  function linkify(parent, text) { text.split(/(https?:\/\/[^\s]+)/g).forEach(function (p) { if (/^https?:\/\//.test(p)) { var a = el("a", null, p); a.href = p; a.target = "_blank"; a.rel = "noopener"; parent.appendChild(a); } else parent.appendChild(document.createTextNode(p)); }); }
+  function plain(html) { var t = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n"); return (new DOMParser().parseFromString(t, "text/html").body.textContent || "").trim(); }
+  function closeModal() { document.getElementById("ov").classList.remove("show"); currentEditEvent = null; }
   function openModal(key, build) {
-    var box = document.getElementById("box");
-    box.className = key; 
-    box.textContent = "";
-    var header = document.createElement('div');
-    header.className = 'postit-header';
-    var x = document.createElement('button');
-    x.className = 'close';
-    x.innerHTML = '✕';
-    x.onclick = closeModal;
-    header.appendChild(x);
-    box.appendChild(header);
-    var body = document.createElement('div');
-    body.className = 'postit-body';
-    box.appendChild(body);
-    build(body, header);
-    document.getElementById("ov").classList.add("show");
+    var box = document.getElementById("box"); box.className = key; box.textContent = "";
+    var header = document.createElement('div'); header.className = 'postit-header';
+    var x = document.createElement('button'); x.className = 'close'; x.innerHTML = '✕'; x.onclick = closeModal; header.appendChild(x); box.appendChild(header);
+    var body = document.createElement('div'); body.className = 'postit-body'; box.appendChild(body);
+    build(body, header); document.getElementById("ov").classList.add("show");
   }
-  
   function openEvent(key, ev) {
     openModal(key, function (body, header) {
-      header.querySelector('h2')?.remove();
-      header.querySelector('.subtitle')?.remove();
-      var h2 = document.createElement('h2');
-      h2.textContent = ev.title;
-      if (ev.customColor && COLOR_MAP[ev.customColor]) {
-        h2.style.color = COLOR_MAP[ev.customColor].hex;
-      }
-      var subtitle = document.createElement('div');
-      subtitle.className = 'subtitle';
-      subtitle.textContent = CAL[key].name + (many(key) ? " · " + ev.src.name : "");
-      header.insertBefore(subtitle, header.firstChild);
-      header.insertBefore(h2, header.firstChild);
-      
+      header.querySelector('h2')?.remove(); header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2'); h2.textContent = ev.title;
+      if (ev.customColor && COLOR_MAP[ev.customColor]) h2.style.color = COLOR_MAP[ev.customColor].hex;
+      var subtitle = document.createElement('div'); subtitle.className = 'subtitle'; subtitle.textContent = CAL[key].name + (many(key) ? " · " + ev.src.name : "");
+      header.insertBefore(subtitle, header.firstChild); header.insertBefore(h2, header.firstChild);
       var when;
-      if (ev.allDay) {
-        var last = addDays(ev.end, -1);
-        when = same(ev.start, last) ? dayLabel(ev.start) + " (dia inteiro)" : dayLabel(ev.start) + " até " + dayLabel(last);
-      } else if (same(ev.start, ev.end)) when = dayLabel(ev.start) + ", " + hhmm(ev.start) + " – " + hhmm(ev.end);
+      if (ev.allDay) { var last = addDays(ev.end, -1); when = same(ev.start, last) ? dayLabel(ev.start) + " (dia inteiro)" : dayLabel(ev.start) + " até " + dayLabel(last); }
+      else if (same(ev.start, ev.end)) when = dayLabel(ev.start) + ", " + hhmm(ev.start) + " – " + hhmm(ev.end);
       else when = dayLabel(ev.start) + " " + hhmm(ev.start) + " → " + dayLabel(ev.end) + " " + hhmm(ev.end);
-      
-      var meta = document.createElement('div');
-      meta.className = 'event-meta';
-      meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : '');
-      body.appendChild(meta);
-      
-      if (ev.desc) { 
-        var d = document.createElement('div');
-        d.className = 'desc-display';
-        linkify(d, plain(ev.desc)); 
-        body.appendChild(d); 
-      }
-      
-      var actions = document.createElement('div');
-      actions.className = 'postit-actions';
-      
-      var btnEdit = document.createElement('button');
-      btnEdit.className = 'btn btn-primary';
-      btnEdit.innerHTML = '✏️ Editar';
-      btnEdit.onclick = function() { openEditModal(key, ev); };
-      actions.appendChild(btnEdit);
-      
-      var btnGcal = document.createElement('a');
-      btnGcal.className = 'btn btn-link';
-      btnGcal.innerHTML = '🔗 Google Agenda';
-      btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`;
-      btnGcal.target = "_blank";
-      actions.appendChild(btnGcal);
-      
-      var btnDel = document.createElement('button');
-      btnDel.className = 'btn btn-danger';
-      btnDel.innerHTML = '🗑️';
-      btnDel.title = 'Excluir';
-      btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
-      actions.appendChild(btnDel);
-      
+      var meta = document.createElement('div'); meta.className = 'event-meta'; meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : ''); body.appendChild(meta);
+      if (ev.desc) { var d = document.createElement('div'); d.className = 'desc-display'; linkify(d, plain(ev.desc)); body.appendChild(d); }
+      var actions = document.createElement('div'); actions.className = 'postit-actions';
+      var btnEdit = document.createElement('button'); btnEdit.className = 'btn btn-primary'; btnEdit.innerHTML = '✏️ Editar'; btnEdit.onclick = function() { openEditModal(key, ev); }; actions.appendChild(btnEdit);
+      var btnGcal = document.createElement('a'); btnGcal.className = 'btn btn-link'; btnGcal.innerHTML = '🔗 Google Agenda'; btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`; btnGcal.target = "_blank"; actions.appendChild(btnGcal);
+      var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '🗑️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel);
       body.appendChild(actions);
     });
   }
-
   function openEditModal(key, ev) {
     currentEditEvent = ev;
     const isEdit = ev && ev.id;
     const calId = ev ? ev.src.id : getDefaultCalendarId(key);
     const calName = ev ? (CAL[key].name + (many(key) ? " · " + ev.src.name : "")) : CAL[key].name;
-    const title = ev ? ev.title : '';
-    const desc = ev ? ev.desc : '';
-    const startDate = ev ? ev.start : new Date();
-    const endDate = ev ? ev.end : new Date(startDate.getTime() + 3600000);
+    const title = ev ? ev.title : '', desc = ev ? ev.desc : '';
+    const startDate = ev ? ev.start : new Date(), endDate = ev ? ev.end : new Date(startDate.getTime() + 3600000);
     const customColor = ev ? ev.customColor : null;
-    
     openModal(key, function (body, header) {
-      header.querySelector('h2')?.remove();
-      header.querySelector('.subtitle')?.remove();
-      var h2 = document.createElement('h2');
-      h2.textContent = isEdit ? '✏️ Editar Evento' : '➕ Novo Evento';
-      var subtitle = document.createElement('div');
-      subtitle.className = 'subtitle';
-      subtitle.textContent = calName;
-      header.insertBefore(subtitle, header.firstChild);
-      header.insertBefore(h2, header.firstChild);
-      
-      var fieldTitle = document.createElement('div');
-      fieldTitle.className = 'field';
-      var lblTitle = document.createElement('label');
-      lblTitle.textContent = 'Título';
-      var inpTitle = document.createElement('input');
-      inpTitle.type = 'text';
-      inpTitle.id = 'edit-title';
-      inpTitle.value = title;
-      inpTitle.placeholder = 'Nome do evento';
-      fieldTitle.appendChild(lblTitle);
-      fieldTitle.appendChild(inpTitle);
-      body.appendChild(fieldTitle);
-      
+      header.querySelector('h2')?.remove(); header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2'); h2.textContent = isEdit ? '✏️ Editar Evento' : '➕ Novo Evento';
+      var subtitle = document.createElement('div'); subtitle.className = 'subtitle'; subtitle.textContent = calName;
+      header.insertBefore(subtitle, header.firstChild); header.insertBefore(h2, header.firstChild);
+      var fieldTitle = document.createElement('div'); fieldTitle.className = 'field';
+      var lblTitle = document.createElement('label'); lblTitle.textContent = 'Título';
+      var inpTitle = document.createElement('input'); inpTitle.type = 'text'; inpTitle.id = 'edit-title'; inpTitle.value = title; inpTitle.placeholder = 'Nome do evento';
+      fieldTitle.appendChild(lblTitle); fieldTitle.appendChild(inpTitle); body.appendChild(fieldTitle);
       if (key === 'f' && !isEdit && many(key)) {
-        var fieldCal = document.createElement('div');
-        fieldCal.className = 'field';
-        var lblCal = document.createElement('label');
-        lblCal.textContent = 'Tipo de Agenda';
-        var selCal = document.createElement('select');
-        selCal.id = 'edit-cal-id';
-        CAL.f.sources.forEach(function(src) {
-          var opt = document.createElement('option');
-          opt.value = src.id;
-          opt.textContent = src.name;
-          if (src.id === calId) opt.selected = true;
-          selCal.appendChild(opt);
-        });
-        fieldCal.appendChild(lblCal);
-        fieldCal.appendChild(selCal);
-        body.appendChild(fieldCal);
-      } else {
-        var hiddenCal = document.createElement('input');
-        hiddenCal.type = 'hidden';
-        hiddenCal.id = 'edit-cal-id';
-        hiddenCal.value = calId;
-        body.appendChild(hiddenCal);
-      }
-      
+        var fieldCal = document.createElement('div'); fieldCal.className = 'field';
+        var lblCal = document.createElement('label'); lblCal.textContent = 'Tipo de Agenda';
+        var selCal = document.createElement('select'); selCal.id = 'edit-cal-id';
+        CAL.f.sources.forEach(function(src) { var opt = document.createElement('option'); opt.value = src.id; opt.textContent = src.name; if (src.id === calId) opt.selected = true; selCal.appendChild(opt); });
+        fieldCal.appendChild(lblCal); fieldCal.appendChild(selCal); body.appendChild(fieldCal);
+      } else { var hiddenCal = document.createElement('input'); hiddenCal.type = 'hidden'; hiddenCal.id = 'edit-cal-id'; hiddenCal.value = calId; body.appendChild(hiddenCal); }
       if (key === 't' && !isEdit) {
-        var fieldColor = document.createElement('div');
-        fieldColor.className = 'field';
-        var lblColor = document.createElement('label');
-        lblColor.textContent = 'Cor do Evento';
-        fieldColor.appendChild(lblColor);
-        var colorSelector = document.createElement('div');
-        colorSelector.className = 'color-selector';
-        colorSelector.id = 'color-selector';
+        var fieldColor = document.createElement('div'); fieldColor.className = 'field';
+        var lblColor = document.createElement('label'); lblColor.textContent = 'Cor do Evento'; fieldColor.appendChild(lblColor);
+        var colorSelector = document.createElement('div'); colorSelector.className = 'color-selector'; colorSelector.id = 'color-selector';
         ['green', 'red', 'blue', 'orange'].forEach(function(colorKey) {
-          var colorDiv = document.createElement('div');
-          colorDiv.className = 'color-option color-' + colorKey + (customColor === colorKey ? ' selected' : '');
-          colorDiv.dataset.color = colorKey;
-          colorDiv.title = COLOR_MAP[colorKey].name;
-          colorDiv.onclick = function() {
-            document.querySelectorAll('.color-option').forEach(function(el) { el.classList.remove('selected'); });
-            colorDiv.classList.add('selected');
-          };
+          var colorDiv = document.createElement('div'); colorDiv.className = 'color-option color-' + colorKey + (customColor === colorKey ? ' selected' : '');
+          colorDiv.dataset.color = colorKey; colorDiv.title = COLOR_MAP[colorKey].name;
+          colorDiv.onclick = function() { document.querySelectorAll('.color-option').forEach(function(el) { el.classList.remove('selected'); }); colorDiv.classList.add('selected'); };
           colorSelector.appendChild(colorDiv);
         });
-        fieldColor.appendChild(colorSelector);
-        body.appendChild(fieldColor);
-      } else {
-        var hiddenColor = document.createElement('input');
-        hiddenColor.type = 'hidden';
-        hiddenColor.id = 'edit-color';
-        hiddenColor.value = customColor || '';
-        body.appendChild(hiddenColor);
-      }
-      
-      var dtStartRow = document.createElement('div');
-      dtStartRow.className = 'datetime-row';
-      
-      var fieldStartDate = document.createElement('div');
-      fieldStartDate.className = 'field';
-      var lblStartDate = document.createElement('label');
-      lblStartDate.textContent = 'Data de Início';
-      var inpStartDate = document.createElement('input');
-      inpStartDate.type = 'date';
-      inpStartDate.id = 'edit-start-date';
-      inpStartDate.value = startDate.toISOString().split('T')[0];
-      fieldStartDate.appendChild(lblStartDate);
-      fieldStartDate.appendChild(inpStartDate);
-      dtStartRow.appendChild(fieldStartDate);
-      
-      var fieldStartTime = document.createElement('div');
-      fieldStartTime.className = 'field';
-      var lblStartTime = document.createElement('label');
-      lblStartTime.textContent = 'Hora de Início';
-      var timePairStart = document.createElement('div');
-      timePairStart.className = 'time-pair';
+        fieldColor.appendChild(colorSelector); body.appendChild(fieldColor);
+      } else { var hiddenColor = document.createElement('input'); hiddenColor.type = 'hidden'; hiddenColor.id = 'edit-color'; hiddenColor.value = customColor || ''; body.appendChild(hiddenColor); }
+      var dtStartRow = document.createElement('div'); dtStartRow.className = 'datetime-row';
+      var fieldStartDate = document.createElement('div'); fieldStartDate.className = 'field';
+      var lblStartDate = document.createElement('label'); lblStartDate.textContent = 'Data de Início';
+      var inpStartDate = document.createElement('input'); inpStartDate.type = 'date'; inpStartDate.id = 'edit-start-date'; inpStartDate.value = startDate.toISOString().split('T')[0];
+      fieldStartDate.appendChild(lblStartDate); fieldStartDate.appendChild(inpStartDate); dtStartRow.appendChild(fieldStartDate);
+      var fieldStartTime = document.createElement('div'); fieldStartTime.className = 'field';
+      var lblStartTime = document.createElement('label'); lblStartTime.textContent = 'Hora de Início';
+      var timePairStart = document.createElement('div'); timePairStart.className = 'time-pair';
       var times = generateTimeOptions();
-      
-      var divH = document.createElement('div');
-      var lblH = document.createElement('label');
-      lblH.textContent = 'Horas';
-      var selH = document.createElement('select');
-      selH.id = 'edit-start-hour';
-      times.hours.forEach(function(h) {
-        var opt = document.createElement('option');
-        opt.value = h; opt.textContent = h;
-        if (parseInt(h) === startDate.getHours()) opt.selected = true;
-        selH.appendChild(opt);
-      });
+      var divH = document.createElement('div'); var lblH = document.createElement('label'); lblH.textContent = 'Horas';
+      var selH = document.createElement('select'); selH.id = 'edit-start-hour';
+      times.hours.forEach(function(h) { var opt = document.createElement('option'); opt.value = h; opt.textContent = h; if (parseInt(h) === startDate.getHours()) opt.selected = true; selH.appendChild(opt); });
       divH.appendChild(lblH); divH.appendChild(selH);
-      
-      var divM = document.createElement('div');
-      var lblM = document.createElement('label');
-      lblM.textContent = 'Minutos';
-      var selM = document.createElement('select');
-      selM.id = 'edit-start-minute';
-      times.minutes.forEach(function(m) {
-        var opt = document.createElement('option');
-        opt.value = m; opt.textContent = m;
-        if (String(startDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
-        selM.appendChild(opt);
-      });
+      var divM = document.createElement('div'); var lblM = document.createElement('label'); lblM.textContent = 'Minutos';
+      var selM = document.createElement('select'); selM.id = 'edit-start-minute';
+      times.minutes.forEach(function(m) { var opt = document.createElement('option'); opt.value = m; opt.textContent = m; if (String(startDate.getMinutes()).padStart(2,'0') === m) opt.selected = true; selM.appendChild(opt); });
       divM.appendChild(lblM); divM.appendChild(selM);
-      
       timePairStart.appendChild(divH); timePairStart.appendChild(divM);
-      fieldStartTime.appendChild(lblStartTime);
-      fieldStartTime.appendChild(timePairStart);
-      dtStartRow.appendChild(fieldStartTime);
-      body.appendChild(dtStartRow);
-      
-      var dtEndRow = document.createElement('div');
-      dtEndRow.className = 'datetime-row';
-      
-      var fieldEndDate = document.createElement('div');
-      fieldEndDate.className = 'field';
-      var lblEndDate = document.createElement('label');
-      lblEndDate.textContent = 'Data de Término';
-      var inpEndDate = document.createElement('input');
-      inpEndDate.type = 'date';
-      inpEndDate.id = 'edit-end-date';
-      inpEndDate.value = endDate.toISOString().split('T')[0];
-      fieldEndDate.appendChild(lblEndDate);
-      fieldEndDate.appendChild(inpEndDate);
-      dtEndRow.appendChild(fieldEndDate);
-      
-      var fieldEndTime = document.createElement('div');
-      fieldEndTime.className = 'field';
-      var lblEndTime = document.createElement('label');
-      lblEndTime.textContent = 'Hora de Término';
-      var timePairEnd = document.createElement('div');
-      timePairEnd.className = 'time-pair';
-      
-      var divH2 = document.createElement('div');
-      var lblH2 = document.createElement('label');
-      lblH2.textContent = 'Horas';
-      var selH2 = document.createElement('select');
-      selH2.id = 'edit-end-hour';
-      times.hours.forEach(function(h) {
-        var opt = document.createElement('option');
-        opt.value = h; opt.textContent = h;
-        if (parseInt(h) === endDate.getHours()) opt.selected = true;
-        selH2.appendChild(opt);
-      });
+      fieldStartTime.appendChild(lblStartTime); fieldStartTime.appendChild(timePairStart); dtStartRow.appendChild(fieldStartTime); body.appendChild(dtStartRow);
+      var dtEndRow = document.createElement('div'); dtEndRow.className = 'datetime-row';
+      var fieldEndDate = document.createElement('div'); fieldEndDate.className = 'field';
+      var lblEndDate = document.createElement('label'); lblEndDate.textContent = 'Data de Término';
+      var inpEndDate = document.createElement('input'); inpEndDate.type = 'date'; inpEndDate.id = 'edit-end-date'; inpEndDate.value = endDate.toISOString().split('T')[0];
+      fieldEndDate.appendChild(lblEndDate); fieldEndDate.appendChild(inpEndDate); dtEndRow.appendChild(fieldEndDate);
+      var fieldEndTime = document.createElement('div'); fieldEndTime.className = 'field';
+      var lblEndTime = document.createElement('label'); lblEndTime.textContent = 'Hora de Término';
+      var timePairEnd = document.createElement('div'); timePairEnd.className = 'time-pair';
+      var divH2 = document.createElement('div'); var lblH2 = document.createElement('label'); lblH2.textContent = 'Horas';
+      var selH2 = document.createElement('select'); selH2.id = 'edit-end-hour';
+      times.hours.forEach(function(h) { var opt = document.createElement('option'); opt.value = h; opt.textContent = h; if (parseInt(h) === endDate.getHours()) opt.selected = true; selH2.appendChild(opt); });
       divH2.appendChild(lblH2); divH2.appendChild(selH2);
-      
-      var divM2 = document.createElement('div');
-      var lblM2 = document.createElement('label');
-      lblM2.textContent = 'Minutos';
-      var selM2 = document.createElement('select');
-      selM2.id = 'edit-end-minute';
-      times.minutes.forEach(function(m) {
-        var opt = document.createElement('option');
-        opt.value = m; opt.textContent = m;
-        if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true;
-        selM2.appendChild(opt);
-      });
+      var divM2 = document.createElement('div'); var lblM2 = document.createElement('label'); lblM2.textContent = 'Minutos';
+      var selM2 = document.createElement('select'); selM2.id = 'edit-end-minute';
+      times.minutes.forEach(function(m) { var opt = document.createElement('option'); opt.value = m; opt.textContent = m; if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true; selM2.appendChild(opt); });
       divM2.appendChild(lblM2); divM2.appendChild(selM2);
-      
       timePairEnd.appendChild(divH2); timePairEnd.appendChild(divM2);
-      fieldEndTime.appendChild(lblEndTime);
-      fieldEndTime.appendChild(timePairEnd);
-      dtEndRow.appendChild(fieldEndTime);
-      body.appendChild(dtEndRow);
-      
-      var fieldDesc = document.createElement('div');
-      fieldDesc.className = 'field';
-      var lblDesc = document.createElement('label');
-      lblDesc.textContent = 'Descrição / Conteúdo';
-      var txtDesc = document.createElement('textarea');
-      txtDesc.id = 'edit-desc';
-      txtDesc.placeholder = 'Detalhes do evento...';
-      txtDesc.value = desc;
-      fieldDesc.appendChild(lblDesc);
-      fieldDesc.appendChild(txtDesc);
-      body.appendChild(fieldDesc);
-      
-      var actions = document.createElement('div');
-      actions.className = 'postit-actions';
-      
-      var btnSave = document.createElement('button');
-      btnSave.className = 'btn btn-primary';
-      btnSave.innerHTML = isEdit ? '💾 Salvar' : '➕ Criar';
-      btnSave.onclick = function() { saveEventFromModal(key); };
-      actions.appendChild(btnSave);
-      
-      var btnCancel = document.createElement('button');
-      btnCancel.className = 'btn btn-secondary';
-      btnCancel.textContent = 'Cancelar';
-      btnCancel.onclick = closeModal;
-      actions.appendChild(btnCancel);
-      
-      if (isEdit) {
-        var btnDel = document.createElement('button');
-        btnDel.className = 'btn btn-danger';
-        btnDel.innerHTML = '🗑️';
-        btnDel.title = 'Excluir';
-        btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); };
-        actions.appendChild(btnDel);
-      }
-      
+      fieldEndTime.appendChild(lblEndTime); fieldEndTime.appendChild(timePairEnd); dtEndRow.appendChild(fieldEndTime); body.appendChild(dtEndRow);
+      var fieldDesc = document.createElement('div'); fieldDesc.className = 'field';
+      var lblDesc = document.createElement('label'); lblDesc.textContent = 'Descrição / Conteúdo';
+      var txtDesc = document.createElement('textarea'); txtDesc.id = 'edit-desc'; txtDesc.placeholder = 'Detalhes do evento...'; txtDesc.value = desc;
+      fieldDesc.appendChild(lblDesc); fieldDesc.appendChild(txtDesc); body.appendChild(fieldDesc);
+      var actions = document.createElement('div'); actions.className = 'postit-actions';
+      var btnSave = document.createElement('button'); btnSave.className = 'btn btn-primary'; btnSave.innerHTML = isEdit ? '💾 Salvar' : '➕ Criar'; btnSave.onclick = function() { saveEventFromModal(key); }; actions.appendChild(btnSave);
+      var btnCancel = document.createElement('button'); btnCancel.className = 'btn btn-secondary'; btnCancel.textContent = 'Cancelar'; btnCancel.onclick = closeModal; actions.appendChild(btnCancel);
+      if (isEdit) { var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel); }
       body.appendChild(actions);
     });
   }
-
   function openDayCreateModal(key, day) {
-    const fakeEv = {
-      src: { id: getDefaultCalendarId(key), name: 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' },
-      start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0),
-      end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0),
-      title: '', desc: '', id: null, customColor: null
-    };
+    const fakeEv = { src: { id: getDefaultCalendarId(key), name: 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' }, start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0), end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0), title: '', desc: '', id: null, customColor: null };
     openEditModal(key, fakeEv);
   }
-
-  function getDefaultCalendarId(key) {
-    if (key === 'f') return CAL.f.sources[0].id;
-    return CAL.t.sources[0].id;
-  }
-
+  function getDefaultCalendarId(key) { if (key === 'f') return CAL.f.sources[0].id; return CAL.t.sources[0].id; }
   function saveEventFromModal(key) {
-    const calId = document.getElementById('edit-cal-id').value;
-    const title = document.getElementById('edit-title').value.trim();
-    const startDateStr = document.getElementById('edit-start-date').value;
-    const startHour = document.getElementById('edit-start-hour').value;
-    const startMinute = document.getElementById('edit-start-minute').value;
-    const endDateStr = document.getElementById('edit-end-date').value;
-    const endHour = document.getElementById('edit-end-hour').value;
-    const endMinute = document.getElementById('edit-end-minute').value;
+    const calId = document.getElementById('edit-cal-id').value, title = document.getElementById('edit-title').value.trim();
+    const startDateStr = document.getElementById('edit-start-date').value, startHour = document.getElementById('edit-start-hour').value, startMinute = document.getElementById('edit-start-minute').value;
+    const endDateStr = document.getElementById('edit-end-date').value, endHour = document.getElementById('edit-end-hour').value, endMinute = document.getElementById('edit-end-minute').value;
     const desc = document.getElementById('edit-desc').value;
-    
     if (!title) { alert('Por favor, preencha o título do evento.'); return; }
     if (!startDateStr || !endDateStr) { alert('Por favor, preencha as datas.'); return; }
-    
-    const startDateTime = new Date(`${startDateStr}T${startHour}:${startMinute}:00`);
-    const endDateTime = new Date(`${endDateStr}T${endHour}:${endMinute}:00`);
-    
-    if (endDateTime <= startDateTime) {
-      alert('A data/hora de término deve ser maior que a de início.');
-      return;
-    }
-    
+    const startDateTime = new Date(`${startDateStr}T${startHour}:${startMinute}:00`), endDateTime = new Date(`${endDateStr}T${endHour}:${endMinute}:00`);
+    if (endDateTime <= startDateTime) { alert('A data/hora de término deve ser maior que a de início.'); return; }
     const selectedColorEl = document.querySelector('#color-selector .color-option.selected');
     const customColor = selectedColorEl ? selectedColorEl.dataset.color : null;
     const colorId = (customColor && COLOR_MAP[customColor]) ? COLOR_MAP[customColor].colorId : undefined;
-    
-    let finalDesc = desc;
-    if (customColor) {
-      finalDesc = `[COLOR:${customColor}] ${desc}`.trim();
-    }
-    
-    const event = {
-      summary: title,
-      description: finalDesc,
-      start: { dateTime: startDateTime.toISOString(), timeZone: 'America/Sao_Paulo' },
-      end: { dateTime: endDateTime.toISOString(), timeZone: 'America/Sao_Paulo' }
-    };
+    let finalDesc = desc; if (customColor) finalDesc = `[COLOR:${customColor}] ${desc}`.trim();
+    const event = { summary: title, description: finalDesc, start: { dateTime: startDateTime.toISOString(), timeZone: 'America/Sao_Paulo' }, end: { dateTime: endDateTime.toISOString(), timeZone: 'America/Sao_Paulo' } };
     if (colorId) event.colorId = colorId;
-    
     const isEdit = currentEditEvent && currentEditEvent.id;
-    
     let promise;
-    if (isEdit) {
-      promise = gapi.client.calendar.events.update({ calendarId: calId, eventId: currentEditEvent.id, resource: event });
-    } else {
-      promise = gapi.client.calendar.events.insert({ calendarId: calId, resource: event });
-    }
-    
-    promise.then(function() {
-      alert(isEdit ? '✅ Evento atualizado com sucesso!' : '✅ Evento criado com sucesso!');
-      closeModal();
-      load();
-    }).catch(function(err) {
-      alert('Erro: ' + (err.result ? err.result.error.message : err.message));
-    });
+    if (isEdit) promise = gapi.client.calendar.events.update({ calendarId: calId, eventId: currentEditEvent.id, resource: event });
+    else promise = gapi.client.calendar.events.insert({ calendarId: calId, resource: event });
+    promise.then(function() { alert(isEdit ? '✅ Evento atualizado com sucesso!' : '✅ Evento criado com sucesso!'); closeModal(); load(); })
+    .catch(function(err) { alert('Erro: ' + (err.result ? err.result.error.message : err.message)); });
   }
-
   function deleteEvent(calendarId, eventId) {
     if (!confirm("Tem certeza que deseja EXCLUIR este evento permanentemente?")) return;
     gapi.client.calendar.events.delete({ calendarId: calendarId, eventId: eventId })
     .then(function() { alert("Evento excluído com sucesso!"); closeModal(); load(); })
     .catch(function(err) { alert("Erro ao excluir: " + (err.result ? err.result.error.message : err.message)); });
   }
-
   function openDay(key, day, evs) {
     openModal(key, function (body, header) {
-      header.querySelector('h2')?.remove();
-      header.querySelector('.subtitle')?.remove();
-      var h2 = document.createElement('h2');
-      h2.textContent = dayLabel(day);
-      var subtitle = document.createElement('div');
-      subtitle.className = 'subtitle';
-      subtitle.textContent = CAL[key].name;
-      header.insertBefore(subtitle, header.firstChild);
-      header.insertBefore(h2, header.firstChild);
-      
-      if (evs.length === 0) {
-        var msg = document.createElement('div');
-        msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;';
-        msg.textContent = 'Nenhum evento neste dia.';
-        body.appendChild(msg);
-      } else {
-        evs.forEach(function (ev) {
-          var b = document.createElement('button');
-          b.className = 'item';
-          b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;';
-          var titleColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : '';
-          b.style.borderLeft = "5px solid " + (titleColor || ev.src.color);
-          b.innerHTML = '<strong style="color:' + (titleColor || 'inherit') + '">' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; <strong style="color:' + (titleColor || 'inherit') + '">' + ev.title + '</strong>' + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : '');
-          b.onclick = function () { openEvent(key, ev); };
-          body.appendChild(b);
-        });
-      }
-      
-      var actions = document.createElement('div');
-      actions.className = 'postit-actions';
-      var btnNew = document.createElement('button');
-      btnNew.className = 'btn btn-primary';
-      btnNew.innerHTML = '➕ Novo Evento neste dia';
-      btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); };
-      actions.appendChild(btnNew);
-      body.appendChild(actions);
+      header.querySelector('h2')?.remove(); header.querySelector('.subtitle')?.remove();
+      var h2 = document.createElement('h2'); h2.textContent = dayLabel(day);
+      var subtitle = document.createElement('div'); subtitle.className = 'subtitle'; subtitle.textContent = CAL[key].name;
+      header.insertBefore(subtitle, header.firstChild); header.insertBefore(h2, header.firstChild);
+      if (evs.length === 0) { var msg = document.createElement('div'); msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;'; msg.textContent = 'Nenhum evento neste dia.'; body.appendChild(msg); }
+      else { evs.forEach(function (ev) { var b = document.createElement('button'); b.className = 'item'; b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;'; var titleColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ''; b.style.borderLeft = "5px solid " + (titleColor || ev.src.color); b.innerHTML = '<strong style="color:' + (titleColor || 'inherit') + '">' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; <strong style="color:' + (titleColor || 'inherit') + '">' + ev.title + '</strong>' + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : ''); b.onclick = function () { openEvent(key, ev); }; body.appendChild(b); }); }
+      var actions = document.createElement('div'); actions.className = 'postit-actions';
+      var btnNew = document.createElement('button'); btnNew.className = 'btn btn-primary'; btnNew.innerHTML = '➕ Novo Evento neste dia'; btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); }; actions.appendChild(btnNew); body.appendChild(actions);
     });
   }
-  
   function chip(key, ev) {
     var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color;
     var b = el("button", "chip" + (ev.allDay ? "" : " timed"), (ev.allDay ? "" : hhmm(ev.start) + " ") + ev.title);
-    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); 
-    b.style.setProperty("--c", displayColor); 
-    if (ev.customColor && COLOR_MAP[ev.customColor]) {
-      b.style.color = displayColor;
-      b.style.fontWeight = '600';
-    }
-    b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
-    return b;
+    b.title = ev.title + (many(key) ? " (" + ev.src.name + ")" : ""); b.style.setProperty("--c", displayColor);
+    if (ev.customColor && COLOR_MAP[ev.customColor]) { b.style.color = displayColor; b.style.fontWeight = '600'; }
+    b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); }; return b;
   }
-
   function renderMonth(body, key, evs) {
     var r = getRange(), g = el("div", "grid"), i, d;
     ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].forEach(function (n) { g.appendChild(el("div", "dow", n)); });
@@ -1320,146 +692,68 @@
       c.appendChild(el("div", "num", d.getDate()));
       var list = onDay(evs, d);
       list.slice(0, 3).forEach(function (ev) { c.appendChild(chip(key, ev)); });
-      if (list.length > 3) {
-        var m = el("button", "more", "+" + (list.length - 3) + " mais");
-        (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list);
-        c.appendChild(m);
-      }
-      (function(dd) {
-        c.onclick = function() {
-          if (list.length === 0) openDayCreateModal(key, dd);
-          else openDay(key, dd, list);
-        };
-      })(d);
+      if (list.length > 3) { var m = el("button", "more", "+" + (list.length - 3) + " mais"); (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list); c.appendChild(m); }
+      (function(dd) { c.onclick = function() { if (list.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, list); }; })(d);
       g.appendChild(c);
     }
     body.appendChild(g);
   }
-  
   function renderWeek(body, key, evs) {
     var r = getRange(), w = el("div", "week"), i, d;
     for (i = 0; i < 7; i++) {
       d = addDays(r.start, i);
       var col = el("div", "col" + (same(d, new Date()) ? " today" : ""));
       col.appendChild(el("div", "hd", d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" })));
-      var dayEvents = onDay(evs, d);
-      dayEvents.forEach(function (ev) { col.appendChild(chip(key, ev)); });
-      (function(dd, evs) {
-        col.onclick = function(e) {
-          if (e.target.classList.contains('chip') || e.target.closest('.chip')) return;
-          if (evs.length === 0) openDayCreateModal(key, dd);
-          else openDay(key, dd, evs);
-        };
-      })(d, dayEvents);
+      var dayEvents = onDay(evs, d); dayEvents.forEach(function (ev) { col.appendChild(chip(key, ev)); });
+      (function(dd, evs) { col.onclick = function(e) { if (e.target.classList.contains('chip') || e.target.closest('.chip')) return; if (evs.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, evs); }; })(d, dayEvents);
       w.appendChild(col);
     }
     body.appendChild(w);
   }
-  
   function renderList(body, key, evs) {
     var r = getRange(), box = el("div", "list"), i, d, any = false;
     for (i = 0; i < 30; i++) {
-      d = addDays(r.start, i);
-      var l = onDay(evs, d);
-      var day = el("div", "day");
-      day.appendChild(el("div", "dh", dayLabel(d)));
-      if (l.length > 0) {
-        any = true;
-        l.forEach(function (ev) {
-          var row = el("button", "row");
-          row.appendChild(el("span", "hr", ev.allDay ? "Dia inteiro" : hhmm(ev.start) + " – " + hhmm(ev.end)));
-          var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color;
-          row.style.borderLeft = "5px solid " + displayColor;
-          var titleSpan = el("span", null, ev.title);
-          if (ev.customColor && COLOR_MAP[ev.customColor]) {
-            titleSpan.style.color = displayColor;
-            titleSpan.style.fontWeight = '600';
-          }
-          row.appendChild(titleSpan);
-          if (many(key)) row.appendChild(el("span", "srcname", ev.src.name));
-          row.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); };
-          day.appendChild(row);
-        });
-      }
-      (function(dd, evs) {
-        day.onclick = function(e) {
-          if (e.target.classList.contains('row') || e.target.closest('.row')) return;
-          if (evs.length === 0) openDayCreateModal(key, dd);
-          else openDay(key, dd, evs);
-        };
-      })(d, l);
+      d = addDays(r.start, i); var l = onDay(evs, d);
+      var day = el("div", "day"); day.appendChild(el("div", "dh", dayLabel(d)));
+      if (l.length > 0) { any = true; l.forEach(function (ev) { var row = el("button", "row"); row.appendChild(el("span", "hr", ev.allDay ? "Dia inteiro" : hhmm(ev.start) + " – " + hhmm(ev.end))); var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color; row.style.borderLeft = "5px solid " + displayColor; var titleSpan = el("span", null, ev.title); if (ev.customColor && COLOR_MAP[ev.customColor]) { titleSpan.style.color = displayColor; titleSpan.style.fontWeight = '600'; } row.appendChild(titleSpan); if (many(key)) row.appendChild(el("span", "srcname", ev.src.name)); row.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); }; day.appendChild(row); }); }
+      (function(dd, evs) { day.onclick = function(e) { if (e.target.classList.contains('row') || e.target.closest('.row')) return; if (evs.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, evs); }; })(d, l);
       box.appendChild(day);
     }
-    if (!any) box.appendChild(el("div", "msg", "Nenhum evento neste período."));
-    body.appendChild(box);
+    if (!any) box.appendChild(el("div", "msg", "Nenhum evento neste período.")); body.appendChild(box);
   }
-
   function renderPanel(key) {
-    var body = document.getElementById("b" + key);
-    var evs = (state.data[key] || []).filter(function (v) { return !state.hidden[v.src.id]; });
-    body.textContent = "";
-    if (state.mode === "MONTH") renderMonth(body, key, evs);
-    else if (state.mode === "WEEK") renderWeek(body, key, evs);
-    else renderList(body, key, evs);
-    var errs = state.errs[key] || [];
-    if (errs.length) body.appendChild(el("div", "msg err", "Não carregou: " + errs.join("; ")));
+    var body = document.getElementById("b" + key); var evs = (state.data[key] || []).filter(function (v) { return !state.hidden[v.src.id]; }); body.textContent = "";
+    if (state.mode === "MONTH") renderMonth(body, key, evs); else if (state.mode === "WEEK") renderWeek(body, key, evs); else renderList(body, key, evs);
+    var errs = state.errs[key] || []; if (errs.length) body.appendChild(el("div", "msg err", "Não carregou: " + errs.join("; ")));
   }
   function buildLegend(key) {
-    var box = document.getElementById("l" + key);
-    box.textContent = "";
-    if (!many(key)) { box.style.display = "none"; return; }
-    box.style.display = "";
-    CAL[key].sources.forEach(function (s) {
-      var b = el("button", "lg" + (state.hidden[s.id] ? " off" : ""));
-      b.style.setProperty("--c", s.color);
-      b.appendChild(document.createElement("i"));
-      b.appendChild(document.createTextNode(s.name));
-      b.onclick = function () { state.hidden[s.id] = !state.hidden[s.id]; saveHidden(); buildLegend(key); renderPanel(key); };
-      box.appendChild(b);
-    });
+    var box = document.getElementById("l" + key); box.textContent = "";
+    if (!many(key)) { box.style.display = "none"; return; } box.style.display = "";
+    CAL[key].sources.forEach(function (s) { var b = el("button", "lg" + (state.hidden[s.id] ? " off" : "")); b.style.setProperty("--c", s.color); b.appendChild(document.createElement("i")); b.appendChild(document.createTextNode(s.name)); b.onclick = function () { state.hidden[s.id] = !state.hidden[s.id]; saveHidden(); buildLegend(key); renderPanel(key); }; box.appendChild(b); });
   }
   function load() {
-    setTitle();
-    var seq = ++state.seq, r = getRange();
+    setTitle(); var seq = ++state.seq, r = getRange();
     ["f", "t"].forEach(function (key) {
-      var show = state.show.indexOf(key) >= 0;
-      document.getElementById("p" + key).classList.toggle("hidden", !show);
-      if (!show) return;
-      buildLegend(key);
-      var body = document.getElementById("b" + key);
-      body.textContent = ""; body.appendChild(el("div", "msg", "Carregando…"));
-      Promise.all(CAL[key].sources.map(function (s) {
-        return fetchSource(s, r).then(function (evs) { return { evs: evs }; }, function (e) { return { err: s.name + ": " + e.message }; });
-      })).then(function (res) {
-        if (seq !== state.seq) return;
-        var all = [], errs = [];
+      var show = state.show.indexOf(key) >= 0; document.getElementById("p" + key).classList.toggle("hidden", !show);
+      if (!show) return; buildLegend(key);
+      var body = document.getElementById("b" + key); body.textContent = ""; body.appendChild(el("div", "msg", "Carregando…"));
+      Promise.all(CAL[key].sources.map(function (s) { return fetchSource(s, r).then(function (evs) { return { evs: evs }; }, function (e) { return { err: s.name + ": " + e.message }; }); }))
+      .then(function (res) {
+        if (seq !== state.seq) return; var all = [], errs = [];
         res.forEach(function (x) { if (x.err) errs.push(x.err); else all = all.concat(x.evs); });
         state.data[key] = all; state.errs[key] = errs;
-        if (errs.length === res.length) {
-          body.textContent = "";
-          body.appendChild(el("div", "msg err", "Não foi possível carregar: " + errs.join("; ") + ". Verifique se você fez login e tem permissão nestas agendas."));
-          return;
-        }
+        if (errs.length === res.length) { body.textContent = ""; body.appendChild(el("div", "msg err", "Não foi possível carregar: " + errs.join("; ") + ". Verifique se você fez login e tem permissão nestas agendas.")); return; }
         renderPanel(key);
       });
     });
     document.querySelectorAll("[data-show]").forEach(function (b) { b.classList.toggle("on", b.dataset.show === state.show); });
     document.querySelectorAll("[data-mode]").forEach(function (b) { b.classList.toggle("on", b.dataset.mode === state.mode); });
   }
-  function move(dir) {
-    var c = state.cursor;
-    if (state.mode === "MONTH") state.cursor = new Date(c.getFullYear(), c.getMonth() + dir, 1);
-    else if (state.mode === "WEEK") state.cursor = addDays(c, 7 * dir);
-    else state.cursor = addDays(c, 30 * dir);
-    load();
-  }
-
+  function move(dir) { var c = state.cursor; if (state.mode === "MONTH") state.cursor = new Date(c.getFullYear(), c.getMonth() + dir, 1); else if (state.mode === "WEEK") state.cursor = addDays(c, 7 * dir); else state.cursor = addDays(c, 30 * dir); load(); }
   document.getElementById("prev").onclick = function () { move(-1); };
   document.getElementById("next").onclick = function () { move(1); };
   document.getElementById("today").onclick = function () { state.cursor = sod(new Date()); load(); };
-  document.querySelectorAll("[data-show]").forEach(function (b) { 
-    b.onclick = function () { state.show = b.dataset.show; load(); }; 
-  });
+  document.querySelectorAll("[data-show]").forEach(function (b) { b.onclick = function () { state.show = b.dataset.show; load(); }; });
   document.querySelectorAll("[data-mode]").forEach(function (b) { b.onclick = function () { state.mode = b.dataset.mode; load(); }; });
   document.getElementById("ov").onclick = function (e) { if (e.target.id === "ov") closeModal(); };
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
