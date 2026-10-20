@@ -24,6 +24,8 @@
   #auth-area { display: flex; gap: 10px; align-items: center; }
   #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; }
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
+  #notif-btn { background: #f59e0b; color: white; border: none; font-weight: bold; }
+  #notif-btn.granted { background: #10b981; }
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .panel.hidden { display:none; }
@@ -336,6 +338,7 @@
     <span id="auth-status" class="lbl">Carregando sistema...</span>
     <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
+    <button id="notif-btn" onclick="ativarNotificacoesAgenda()" title="Ativar notificações do sistema">🔔 Ativar Notificações</button>
   </div>
   <div class="group">
     <span class="lbl">Mostrar:</span>
@@ -365,7 +368,7 @@
   const REMINDER_DISPLAY_TIME = 25000; // 25 segundos
   
   let tokenClient, gapiInited = false, gisInited = false, currentEditEvent = null, isUserLoggedIn = false;
-  let reminderCheckInterval = null, titleBlinkInterval = null, originalTitle = document.title;
+  let reminderWorker = null, titleBlinkInterval = null, originalTitle = document.title;
   const COLOR_MAP = { 'green': { colorId: '10', hex: '#0b8043', name: 'Verde', toastClass: 'color-green' }, 'red': { colorId: '11', hex: '#d93025', name: 'Vermelho', toastClass: 'color-red' }, 'blue': { colorId: '9', hex: '#1a73e8', name: 'Azul', toastClass: 'color-blue' }, 'orange': { colorId: '6', hex: '#e8710a', name: 'Laranja', toastClass: 'color-orange' } };
   const reminderState = {};
 
@@ -428,7 +431,6 @@
     try {
       const data = JSON.parse(syncData);
       const now = Date.now();
-      // Dados válidos por 30 segundos
       if (now - data.timestamp < 30000) {
         return data;
       } else {
@@ -448,18 +450,14 @@
       machineId: navigator.userAgent + '_' + Date.now()
     };
     localStorage.setItem(getSyncKey(eventId), JSON.stringify(syncData));
-    
-    // Dispara evento customizado para outras abas
     window.dispatchEvent(new CustomEvent('reminderSync', { detail: syncData }));
   }
   
-  // Escuta mudanças no localStorage (outras abas/máquinas)
   window.addEventListener('storage', function(e) {
-    if (e.key.startsWith(SYNC_KEY_PREFIX)) {
+    if (e.key && e.key.startsWith(SYNC_KEY_PREFIX)) {
       try {
         const data = JSON.parse(e.newValue);
         if (data && data.action) {
-          // Outra máquina interagiu - fecha o toast correspondente
           const toast = document.querySelector(`[data-event-id="${data.eventId}"]`);
           if (toast) {
             closeReminderToast(toast, null, true, true);
@@ -523,72 +521,245 @@
     document.getElementById('logout-btn').style.display = 'inline-block';
     document.getElementById('auth-status').textContent = "✅ Conectado";
     load();
-    startReminderCheck();
+    iniciarSistemaAlertas();
+    atualizarEstadoBotaoNotificacao();
   }
   function handleAuthClick() { tokenClient.requestAccessToken({prompt: 'consent'}); }
   function handleSignoutClick() {
     sessionStorage.removeItem('gcal_access_token'); sessionStorage.removeItem('gcal_token_expiry');
     const token = gapi.client.getToken();
     if (token && token.access_token) {
-      google.accounts.oauth2.revoke(token.access_token, () => { gapi.client.setToken(null); isUserLoggedIn = false; stopReminderCheck(); stopTitleBlink(); location.reload(); });
-    } else { isUserLoggedIn = false; stopReminderCheck(); stopTitleBlink(); location.reload(); }
+      google.accounts.oauth2.revoke(token.access_token, () => { gapi.client.setToken(null); isUserLoggedIn = false; pararSistemaAlertas(); stopTitleBlink(); location.reload(); });
+    } else { isUserLoggedIn = false; pararSistemaAlertas(); stopTitleBlink(); location.reload(); }
   }
 
-  // ========== SISTEMA DE LEMBRETES ==========
+  // ======================================================================
+  // ===== NOVO SISTEMA DE ALERTAS - CORRIGIDO E APRIMORADO ================
+  // ======================================================================
   
-  function startReminderCheck() {
-    stopReminderCheck();
-    checkUpcomingEvents();
-    reminderCheckInterval = setInterval(checkUpcomingEvents, 10000);
+  const MINUTOS_ALERTA = [15, 10, 5];
+  const ALERTA_STORAGE_KEY = "agenda_alertas_v2";
+  
+  // Persistência dos disparos em localStorage (não reseta ao recarregar página)
+  function hojeISO() {
+    return new Date().toISOString().slice(0, 10);
   }
   
-  function stopReminderCheck() {
-    if (reminderCheckInterval) { clearInterval(reminderCheckInterval); reminderCheckInterval = null; }
+  function carregarControleDisparos() {
+    const padrao = { dia: hojeISO(), eventos: {} };
+    try {
+      const salvo = JSON.parse(localStorage.getItem(ALERTA_STORAGE_KEY));
+      if (!salvo || salvo.dia !== padrao.dia) {
+        return padrao;
+      }
+      return { dia: padrao.dia, eventos: salvo.eventos || {} };
+    } catch (e) {
+      return padrao;
+    }
   }
   
-  function checkUpcomingEvents() {
+  function salvarControleDisparos(controle) {
+    try {
+      localStorage.setItem(ALERTA_STORAGE_KEY, JSON.stringify(controle));
+    } catch (e) { console.warn('Erro ao salvar controle:', e); }
+  }
+  
+  function verificarAlertas() {
     if (!state.data.f && !state.data.t) return;
     
-    const now = new Date();
+    const agora = Date.now();
     const allEvents = [...(state.data.f || []), ...(state.data.t || [])];
+    const controle = carregarControleDisparos();
+    let mudou = false;
     
     allEvents.forEach(function(ev) {
       if (!ev.id || ev.allDay) return;
       
       // Verifica se outra máquina já interagiu
       const syncData = checkReminderSync(ev.id);
-      if (syncData) return; // Já foi processado por outra máquina
+      if (syncData && syncData.action === 'dismissed') return;
       
-      const eventId = ev.id;
       const eventStart = ev.start.getTime();
-      const minutesUntil = Math.round((eventStart - now.getTime()) / 60000);
       
-      if (!reminderState[eventId]) {
-        reminderState[eventId] = { dismissed: false, nextTrigger: 15, snoozeCount: 0, lastShown: 0 };
+      // Se o horário já passou, não dispara mais
+      if (agora >= eventStart) return;
+      
+      const chave = String(ev.id);
+      if (!controle.eventos[chave]) {
+        controle.eventos[chave] = {};
       }
       
-      const rs = reminderState[eventId];
-      if (rs.dismissed) return;
+      // Verifica snooze (se o usuário pediu para adiar)
+      if (!reminderState[chave]) {
+        reminderState[chave] = { snoozeUntil: 0 };
+      }
+      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) {
+        return;
+      }
       
-      const timeSinceLastShow = (now.getTime() - rs.lastShown) / 60000;
+      // Encontra apenas o marco atual: 15 -> 10 -> 5
+      const devido = MINUTOS_ALERTA.find(function(minutos) {
+        const limite = eventStart - minutos * 60000;
+        return agora >= limite && !controle.eventos[chave][minutos];
+      });
       
-      if (minutesUntil <= rs.nextTrigger && minutesUntil >= 0 && timeSinceLastShow > 2) {
-        showReminderToast(ev, rs, minutesUntil);
-        rs.lastShown = now.getTime();
+      if (devido) {
+        // Marca o marco atual e também marcos anteriores que já ficaram para trás
+        // Isso evita disparar 15 e 10 atrasados quando a aba voltou depois de muito tempo
+        MINUTOS_ALERTA.forEach(function(minutos) {
+          if (minutos >= devido) {
+            controle.eventos[chave][minutos] = true;
+          }
+        });
+        
+        mudou = true;
+        mostrarAlerta(ev, devido);
       }
     });
+    
+    if (mudou) {
+      salvarControleDisparos(controle);
+    }
   }
+  
+  function mostrarAlerta(ev, minutos) {
+    // Cria um rs compatível com showReminderToast
+    const rs = reminderState[ev.id] || { snoozeUntil: 0 };
+    showReminderToast(ev, rs, minutos);
+    
+    // Notificação do sistema se aba estiver oculta
+    if (
+      document.hidden &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      try {
+        new Notification(`Faltam ${minutos} minutos`, {
+          body: ev.title + (ev.desc ? "\n" + ev.desc.substring(0, 60) : ""),
+          tag: `agenda-${ev.id}-${minutos}`,
+          requireInteraction: false,
+          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>"
+        });
+      } catch (e) {
+        console.warn("Falha ao mostrar notificação:", e);
+      }
+    }
+  }
+  
+  // Worker que mantém o timer rodando mesmo com a aba em background
+  function iniciarTimerViaWorker() {
+    try {
+      const codigoWorker = `
+        let timer = null;
+        self.onmessage = function (e) {
+          if (e.data && e.data.cmd === "start") {
+            clearTimeout(timer);
+            const tick = () => {
+              self.postMessage("tick");
+              timer = setTimeout(tick, 1000);
+            };
+            tick();
+          } else if (e.data && e.data.cmd === "stop") {
+            clearTimeout(timer);
+          }
+        };
+      `;
+      const blob = new Blob([codigoWorker], { type: "application/javascript" });
+      const worker = new Worker(URL.createObjectURL(blob));
+      worker.onmessage = function() {
+        verificarAlertas();
+      };
+      worker.postMessage({ cmd: "start" });
+      return worker;
+    } catch (e) {
+      console.warn("Web Worker indisponível, usando fallback:", e);
+      return setInterval(verificarAlertas, 1000);
+    }
+  }
+  
+  function iniciarSistemaAlertas() {
+    pararSistemaAlertas();
+    verificarAlertas();
+    reminderWorker = iniciarTimerViaWorker();
+  }
+  
+  function pararSistemaAlertas() {
+    if (reminderWorker) {
+      if (reminderWorker.terminate) {
+        reminderWorker.terminate();
+      } else if (typeof reminderWorker === 'number') {
+        clearInterval(reminderWorker);
+      }
+      reminderWorker = null;
+    }
+  }
+  
+  // Recalcula imediatamente quando a aba volta a ficar visível
+  document.addEventListener("visibilitychange", function() {
+    if (!document.hidden && isUserLoggedIn) {
+      verificarAlertas();
+    }
+  });
+  
+  window.addEventListener("focus", function() {
+    if (isUserLoggedIn) verificarAlertas();
+  });
+  
+  // Ativa notificações do sistema (clicando no botão 🔔)
+  async function ativarNotificacoesAgenda() {
+    if (!("Notification" in window)) {
+      alert("Este navegador não suporta notificações.");
+      return;
+    }
+    if (Notification.permission === "granted") {
+      alert("✅ Notificações já estão ativadas!\nVocê receberá avisos mesmo quando a aba estiver em segundo plano.");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      alert("❌ As notificações estão bloqueadas.\nLibere nas configurações do navegador (clique no ícone 🔒 ao lado da URL).");
+      return;
+    }
+    const permissao = await Notification.requestPermission();
+    if (permissao === "granted") {
+      alert("✅ Notificações ativadas com sucesso!\nVocê será avisado mesmo quando a aba estiver em segundo plano.");
+      new Notification("📅 Notificações ativadas", { body: "Você receberá alertas da agenda aqui." });
+      atualizarEstadoBotaoNotificacao();
+    } else {
+      alert("⚠️ Permissão de notificação não concedida.");
+    }
+  }
+  
+  function atualizarEstadoBotaoNotificacao() {
+    const btn = document.getElementById('notif-btn');
+    if (!btn) return;
+    if ("Notification" in window && Notification.permission === "granted") {
+      btn.textContent = "✅ Notificações Ativas";
+      btn.classList.add('granted');
+    } else {
+      btn.textContent = "🔔 Ativar Notificações";
+      btn.classList.remove('granted');
+    }
+  }
+  
+  // Expõe globalmente para o onclick
+  window.ativarNotificacoesAgenda = ativarNotificacoesAgenda;
+  
+  // Inicializa o estado do botão ao carregar a página
+  atualizarEstadoBotaoNotificacao();
+
+  // ======================================================================
+  // ===== FIM DO NOVO SISTEMA DE ALERTAS ==================================
+  // ======================================================================
   
   function getEventColorClass(ev) {
     if (ev.customColor && COLOR_MAP[ev.customColor]) {
       return COLOR_MAP[ev.customColor].toastClass;
     }
-    // Detecta cor baseada na agenda
     if (ev.src.id === CAL.t.sources[0].id) return 'color-purple';
-    return 'color-blue'; // padrão
+    return 'color-blue';
   }
   
-  function showReminderToast(ev, rs, minutesUntil) {
+  function showReminderToast(ev, rs, minutos) {
     const container = document.getElementById('reminder-container');
     const existingToast = container.querySelector(`[data-event-id="${ev.id}"]`);
     if (existingToast) existingToast.remove();
@@ -597,16 +768,14 @@
     toast.className = 'teams-toast ' + getEventColorClass(ev);
     toast.dataset.eventId = ev.id;
     
-    const timeText = minutesUntil === 0 ? 'Agora!' : 
-                     minutesUntil < 60 ? `Em ${minutesUntil} min` :
-                     `Em ${Math.floor(minutesUntil/60)}h ${minutesUntil%60}min`;
+    const timeText = `Faltam ${minutos} min • ${hhmm(ev.start)}`;
     
     toast.innerHTML = `
       <div class="teams-header">
         <div class="teams-icon">🔔</div>
         <div class="teams-header-text">
           <div class="app-name">Agenda GTEK</div>
-          <div class="time-badge">${timeText} • ${hhmm(ev.start)}</div>
+          <div class="time-badge">${timeText}</div>
         </div>
       </div>
       <div class="teams-body">
@@ -623,34 +792,24 @@
     `;
     
     container.appendChild(toast);
-    
-    // Som de notificação
     playNotificationSound();
-    
-    // Pisca o título da aba
     startTitleBlink(ev.title);
     
-    // Auto-fechar após 25 segundos
     const autoCloseTimer = setTimeout(() => {
       closeReminderToast(toast, rs, true);
     }, REMINDER_DISPLAY_TIME);
     
     toast.querySelector('[data-action="now"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      rs.dismissed = true;
       updateReminderSync(ev.id, 'dismissed');
       closeReminderToast(toast, rs, true);
     };
     
     toast.querySelector('[data-action="snooze"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      rs.snoozeCount++;
-      rs.lastShown = 0;
-      
-      if (rs.nextTrigger === 15) rs.nextTrigger = 10;
-      else if (rs.nextTrigger === 10) rs.nextTrigger = 5;
-      else if (rs.nextTrigger === 5) rs.nextTrigger = 0;
-      else rs.dismissed = true;
+      // Snooze: adia o próximo alerta por 5 minutos
+      if (!reminderState[ev.id]) reminderState[ev.id] = {};
+      reminderState[ev.id].snoozeUntil = Date.now() + 5 * 60000;
       
       updateReminderSync(ev.id, 'snoozed');
       closeReminderToast(toast, rs, false);
@@ -671,7 +830,7 @@
     }
     setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
     
-    if (wasDismissed || rs.dismissed) {
+    if (wasDismissed || (rs && rs.dismissed)) {
       setTimeout(() => {
         const container = document.getElementById('reminder-container');
         if (container.children.length === 0) stopTitleBlink();
