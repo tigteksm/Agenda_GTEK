@@ -28,6 +28,7 @@
   #notif-btn.granted { background: #10b981; }
   #keepawake-btn { background: #6b7280; color: white; border: none; font-weight: bold; }
   #keepawake-btn.on { background: #10b981; }
+  #test-btn { background: #6264a7; color: white; border: none; font-weight: bold; }
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .panel.hidden { display:none; }
@@ -150,7 +151,6 @@
     font-family: 'Segoe UI', system-ui, sans-serif;
   }
   
-  /* Cores dinâmicas baseadas no evento */
   .teams-toast.color-green {
     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     border-left-color: #28a745;
@@ -342,6 +342,7 @@
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
     <button id="notif-btn" onclick="ativarNotificacoesAgenda()" title="Ativar notificações do sistema">🔔 Ativar Notificações</button>
     <button id="keepawake-btn" onclick="alternarKeepAwake()" title="Impede o Chrome de congelar a aba em segundo plano">⏻ Manter Ativo</button>
+    <button id="test-btn" onclick="testarAlertaAgora()" title="Dispara um alerta de teste AGORA (toast + balão do Windows)">🧪 Testar</button>
   </div>
   <div class="group">
     <span class="lbl">Mostrar:</span>
@@ -537,16 +538,29 @@
   }
 
   // ======================================================================
-  // ===== SISTEMA DE ALERTAS v3 - KEEP-AWAKE + NOTIFICAÇÃO DE SISTEMA ====
+  // ===== SISTEMA DE ALERTAS v4 ==========================================
+  // ===== - Chave inclui horário do evento (remarcou => reseta flags) ====
+  // ===== - Storage v4 (invalida flags velhas que travavam testes) =======
+  // ===== - Logs [ALERTA] no console para diagnóstico =====================
+  // ===== - Botão 🧪 Testar ===============================================
   // ======================================================================
   
   const MINUTOS_ALERTA = [15, 10, 5];
-  const ALERTA_STORAGE_KEY = "agenda_alertas_v2";
+  const ALERTA_STORAGE_KEY = "agenda_alertas_v4";
+  const DEBUG_ALERTAS = true; // mude para false para silenciar o console
   
-  function hojeISO() { return new Date().toISOString().slice(0, 10); }
+  function logA() {
+    if (!DEBUG_ALERTAS) return;
+    try { console.log.apply(console, ['[ALERTA]'].concat(Array.prototype.slice.call(arguments))); } catch (e) {}
+  }
+  
+  function hojeLocal() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
   
   function carregarControleDisparos() {
-    const padrao = { dia: hojeISO(), eventos: {} };
+    const padrao = { dia: hojeLocal(), eventos: {} };
     try {
       const salvo = JSON.parse(localStorage.getItem(ALERTA_STORAGE_KEY));
       if (!salvo || salvo.dia !== padrao.dia) return padrao;
@@ -556,6 +570,14 @@
   
   function salvarControleDisparos(controle) {
     try { localStorage.setItem(ALERTA_STORAGE_KEY, JSON.stringify(controle)); } catch (e) {}
+  }
+  
+  function purgarRegistrosAntigos(controle, agora) {
+    Object.keys(controle.eventos).forEach(function(k) {
+      const idx = k.lastIndexOf('@');
+      const start = parseInt(k.slice(idx + 1), 10);
+      if (!start || start < agora - 3600000) delete controle.eventos[k];
+    });
   }
   
   // ---------- KEEP-AWAKE: impede o Chrome de CONGELAR a aba oculta ----------
@@ -613,7 +635,6 @@
     b.textContent = keepAwake.ativo ? '⚡ Aba Mantida Ativa' : '⏻ Manter Ativo';
   }
   
-  // Autoplay policy: ativa no primeiro clique do usuário após o login
   document.addEventListener('pointerdown', function gestoKeepAwake() {
     if (isUserLoggedIn && iniciarKeepAwake()) {
       document.removeEventListener('pointerdown', gestoKeepAwake, true);
@@ -632,20 +653,32 @@
     allEvents.forEach(function(ev) {
       if (!ev.id || ev.allDay) return;
       
-      const syncData = checkReminderSync(ev.id);
-      if (syncData && syncData.action === 'dismissed') return;
-      
       const eventStart = ev.start.getTime();
       if (agora >= eventStart) return;
       
-      const chave = String(ev.id);
+      const restanteMin = (eventStart - agora) / 60000;
+      if (restanteMin > 20) return; // fora da janela de alertas
+      
+      const syncData = checkReminderSync(ev.id);
+      if (syncData && syncData.action === 'dismissed') return;
+      
+      // CHAVE COMPOSTA: se o evento for remarcado, o timestamp muda e as flags resetam
+      const chave = ev.id + '@' + eventStart;
       if (!controle.eventos[chave]) controle.eventos[chave] = {};
-      if (!reminderState[chave]) reminderState[chave] = { snoozeUntil: 0 };
-      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) return;
+      if (!reminderState[chave]) reminderState[chave] = { snoozeUntil: 0, lastLog: 0 };
+      
+      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) {
+        return;
+      }
+      
+      // Log de diagnóstico (no máx. a cada 15s por evento)
+      if (restanteMin <= 16 && agora - reminderState[chave].lastLog > 15000) {
+        reminderState[chave].lastLog = agora;
+        logA(`"${ev.title}" faltam ${restanteMin.toFixed(1)} min | já disparados: ${JSON.stringify(controle.eventos[chave])} | hidden=${document.hidden} | keepAwake=${keepAwake.ativo}`);
+      }
       
       const devido = MINUTOS_ALERTA.find(function(minutos) {
-        const limite = eventStart - minutos * 60000;
-        return agora >= limite && !controle.eventos[chave][minutos];
+        return agora >= eventStart - minutos * 60000 && !controle.eventos[chave][minutos];
       });
       
       if (devido) {
@@ -653,23 +686,30 @@
           if (minutos >= devido) controle.eventos[chave][minutos] = true;
         });
         mudou = true;
+        logA(`>>> DISPARO ${devido} min -> "${ev.title}" (aba oculta: ${document.hidden})`);
         mostrarAlerta(ev, devido);
       }
     });
     
-    if (mudou) salvarControleDisparos(controle);
+    if (mudou) {
+      purgarRegistrosAntigos(controle, agora);
+      salvarControleDisparos(controle);
+    }
   }
   
   function mostrarAlerta(ev, minutos) {
-    const rs = reminderState[ev.id] || { snoozeUntil: 0 };
+    const rs = reminderState[ev.id + '@' + ev.start.getTime()] || { snoozeUntil: 0 };
     
+    // Popup interno (visível com a aba da agenda na frente)
     showReminderToast(ev, rs, minutos);
     
+    // Balão do SISTEMA (aparece sobre QUALQUER janela / navegador minimizado)
     if (document.hidden) notificarSistema(ev, minutos);
   }
   
   function notificarSistema(ev, minutos) {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    if (!("Notification" in window)) { logA('Notification API indisponível neste navegador'); return; }
+    if (Notification.permission !== "granted") { logA('Permissão de notificação NÃO concedida'); return; }
     try {
       const n = new Notification(`⏰ Faltam ${minutos} min — ${ev.title}`, {
         body: `${hhmm(ev.start)} – ${hhmm(ev.end)}${ev.desc ? '\n' + ev.desc.substring(0, 80) : ''}`,
@@ -678,8 +718,31 @@
         silent: false
       });
       n.onclick = function() { window.focus(); n.close(); };
-    } catch (e) { console.warn('Falha na notificação do sistema:', e); }
+      n.onerror = function(e) { console.warn('[ALERTA] erro na notificação:', e); };
+      logA('Notificação do sistema enviada:', ev.title, minutos, 'min');
+    } catch (e) {
+      console.warn('[ALERTA] Falha na notificação do sistema:', e);
+    }
   }
+  
+  // ---------- Botão 🧪 Testar: prova que o balão do Windows sobrepõe tudo ----------
+  function testarAlertaAgora() {
+    const inicio = new Date(Date.now() + 5 * 60000);
+    const evFake = {
+      id: 'teste-' + Date.now(),
+      title: '🧪 TESTE de Notificação',
+      start: inicio,
+      end: new Date(inicio.getTime() + 30 * 60000),
+      desc: 'Se este balão apareceu sobre outras janelas, o sistema está OK.',
+      src: CAL.f.sources[0],
+      customColor: 'blue'
+    };
+    logA('Teste manual disparado.');
+    showReminderToast(evFake, {}, 5);
+    notificarSistema(evFake, 5); // força o balão do sistema mesmo com a aba visível
+    playNotificationSound();
+  }
+  window.testarAlertaAgora = testarAlertaAgora;
   
   // ---------- Timer: Web Worker + backup na página ----------
   function iniciarTimerViaWorker() {
@@ -698,9 +761,10 @@
       const worker = new Worker(URL.createObjectURL(blob));
       worker.onmessage = function() { verificarAlertas(); };
       worker.postMessage({ cmd: "start" });
+      logA('Web Worker do timer iniciado.');
       return worker;
     } catch (e) {
-      console.warn("Web Worker indisponível, usando fallback:", e);
+      console.warn("[ALERTA] Web Worker indisponível, usando fallback:", e);
       return setInterval(verificarAlertas, 1000);
     }
   }
@@ -711,6 +775,7 @@
     verificarAlertas();
     reminderWorker = iniciarTimerViaWorker();
     backupInterval = setInterval(verificarAlertas, 1000);
+    logA('Sistema de alertas v4 iniciado.');
   }
   
   function pararSistemaAlertas() {
@@ -722,11 +787,13 @@
     if (backupInterval) { clearInterval(backupInterval); backupInterval = null; }
   }
   
-  // Ao voltar para a aba: reativa o keep-awake e recalcula na hora
   document.addEventListener("visibilitychange", function() {
     if (!document.hidden) {
       if (keepAwake.desejado && keepAwake.ctx && keepAwake.ctx.state === 'suspended') iniciarKeepAwake();
-      if (isUserLoggedIn) verificarAlertas();
+      if (isUserLoggedIn) {
+        logA('Aba voltou a ficar visível — recalculando alertas.');
+        verificarAlertas();
+      }
     }
   });
   window.addEventListener("focus", function() { if (isUserLoggedIn) verificarAlertas(); });
@@ -769,7 +836,7 @@
   atualizarEstadoBotaoNotificacao();
   atualizarBotaoKeepAwake();
   // ======================================================================
-  // ===== FIM DO SISTEMA DE ALERTAS v3 ====================================
+  // ===== FIM DO SISTEMA DE ALERTAS v4 ====================================
   // ======================================================================
   
   function getEventColorClass(ev) {
@@ -828,8 +895,9 @@
     
     toast.querySelector('[data-action="snooze"]').onclick = function() {
       clearTimeout(autoCloseTimer);
-      if (!reminderState[ev.id]) reminderState[ev.id] = {};
-      reminderState[ev.id].snoozeUntil = Date.now() + 5 * 60000;
+      const chave = ev.id + '@' + ev.start.getTime();
+      if (!reminderState[chave]) reminderState[chave] = {};
+      reminderState[chave].snoozeUntil = Date.now() + 5 * 60000;
       
       updateReminderSync(ev.id, 'snoozed');
       closeReminderToast(toast, rs, false);
