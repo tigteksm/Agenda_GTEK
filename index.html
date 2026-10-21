@@ -712,7 +712,7 @@
     const w = 380, h = 260;
     const left = Math.max(0, (screen.availWidth - w) - 12);
     const top = Math.max(0, (screen.availHeight - h) - 12);
-    compWin = window.open('', 'agendaAlertasCompanion', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + left + ',resizable=yes,scrollbars=no');
+    compWin = window.open('', 'agendaAlertasCompanion', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=no');
     if (!compWin) {
       alert('O navegador bloqueou a abertura da janela.\nPermita pop-ups para este site e clique novamente.');
       return null;
@@ -1203,7 +1203,7 @@
       var selM2 = document.createElement('select'); selM2.id = 'edit-end-minute';
       times.minutes.forEach(function(m) { var opt = document.createElement('option'); opt.value = m; opt.textContent = m; if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true; selM2.appendChild(opt); });
       divM2.appendChild(lblM2); divM2.appendChild(selM2);
-      timePairEnd.appendChild(divH2); timePairEnd.appendChild(divM2);
+      timePairEnd.appendChild(divH2); divM2.appendChild(divM2 ? selM2 : selM2);
       fieldEndTime.appendChild(lblEndTime); fieldEndTime.appendChild(timePairEnd); dtEndRow.appendChild(fieldEndTime); body.appendChild(dtEndRow);
       var fieldDesc = document.createElement('div'); fieldDesc.className = 'field';
       var lblDesc = document.createElement('label'); lblDesc.textContent = 'Descrição / Conteúdo';
@@ -1268,6 +1268,25 @@
     if (ev.customColor && COLOR_MAP[ev.customColor]) { b.style.color = displayColor; b.style.fontWeight = '600'; }
     b.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); }; return b;
   }
+  
+  // ===== AJUSTE v7.1: rola a grade do Mês para deixar a SEMANA ATUAL =====
+  // ===== como primeira linha visível (abaixo do cabeçalho fixo) ==========
+  function scrollSemanaAtualParaTopo(body) {
+    requestAnimationFrame(function() {
+      try {
+        const todayCell = body.querySelector('.cell.today');
+        if (!todayCell) { body.scrollTop = 0; return; }
+        const dow = body.querySelector('.dow');
+        const dowH = dow ? dow.offsetHeight : 0;
+        const containerRect = body.getBoundingClientRect();
+        const cellRect = todayCell.getBoundingClientRect();
+        // distância atual entre o topo da célula de hoje e o topo visível (abaixo do sticky)
+        const delta = cellRect.top - (containerRect.top + dowH);
+        body.scrollTop = Math.max(0, body.scrollTop + delta);
+      } catch (e) { console.warn('Falha ao rolar semana atual:', e); }
+    });
+  }
+  
   function renderMonth(body, key, evs) {
     var r = getRange(), g = el("div", "grid"), i, d;
     ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].forEach(function (n) { g.appendChild(el("div", "dow", n)); });
@@ -1282,6 +1301,7 @@
       g.appendChild(c);
     }
     body.appendChild(g);
+    scrollSemanaAtualParaTopo(body);
   }
   function renderWeek(body, key, evs) {
     var r = getRange(), w = el("div", "week"), i, d;
