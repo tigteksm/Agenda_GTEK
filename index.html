@@ -399,6 +399,8 @@
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function dayLabel(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }); }
   function generateTimeOptions() { const hours = []; for (let h = 0; h < 24; h++) hours.push(String(h).padStart(2, '0')); return { hours, minutes: ['00', '15', '30', '45'] }; }
+  // ===== REGRA: o popup modal de criar/editar evento existe SOMENTE na agenda TECNICA =====
+  function podeAbrirPopupEdicao(key) { return key === 't'; }
 
   // ===== SOM DE NOTIFICAÇÃO =====
   let audioCtx = null;
@@ -982,6 +984,9 @@
     const existing = container.querySelector('[data-event-id="' + ev.id + '"]');
     if (existing) existing.remove();
     
+    // Botão "Editar" no toast SOMENTE para eventos da TECNICA
+    const isTecnica = !!(ev.src && ev.src.id === CAL.t.sources[0].id);
+    
     const toast = doc.createElement('div');
     toast.className = 'teams-toast ' + getEventColorClass(ev);
     toast.dataset.eventId = ev.id;
@@ -1005,7 +1010,7 @@
       <div class="teams-actions">
         <button class="teams-btn teams-btn-now" data-action="now">▶ Agora</button>
         <button class="teams-btn teams-btn-snooze" data-action="snooze">⏱ +5min</button>
-        <button class="teams-btn teams-btn-edit" data-action="edit">✏️ Editar</button>
+        ${isTecnica ? '<button class="teams-btn teams-btn-edit" data-action="edit">✏️ Editar</button>' : ''}
       </div>
       <div class="teams-progress"><div class="teams-progress-bar"></div></div>
     `;
@@ -1033,12 +1038,12 @@
       closeReminderToast(toast, rs, false);
     };
     
-    toast.querySelector('[data-action="edit"]').onclick = function() {
+    const editBtn = toast.querySelector('[data-action="edit"]');
+    if (editBtn) editBtn.onclick = function() {
       clearTimeout(autoCloseTimer);
       updateReminderSync(ev.id, 'editing');
       closeReminderToast(toast, rs, false);
-      const key = ev.src.id === CAL.t.sources[0].id ? 't' : 'f';
-      openEditModal(key, ev);
+      openEditModal('t', ev);
     };
   }
   
@@ -1127,13 +1132,16 @@
       var meta = document.createElement('div'); meta.className = 'event-meta'; meta.innerHTML = '📅 <strong>' + when + '</strong>' + (ev.loc ? '<br>📍 ' + ev.loc : ''); body.appendChild(meta);
       if (ev.desc) { var d = document.createElement('div'); d.className = 'desc-display'; linkify(d, plain(ev.desc)); body.appendChild(d); }
       var actions = document.createElement('div'); actions.className = 'postit-actions';
-      var btnEdit = document.createElement('button'); btnEdit.className = 'btn btn-primary'; btnEdit.innerHTML = '✏️ Editar'; btnEdit.onclick = function() { openEditModal(key, ev); }; actions.appendChild(btnEdit);
+      // Botão "Editar" (abre o popup de edição) SOMENTE na TECNICA
+      if (podeAbrirPopupEdicao(key)) { var btnEdit = document.createElement('button'); btnEdit.className = 'btn btn-primary'; btnEdit.innerHTML = '✏️ Editar'; btnEdit.onclick = function() { openEditModal(key, ev); }; actions.appendChild(btnEdit); }
       var btnGcal = document.createElement('a'); btnGcal.className = 'btn btn-link'; btnGcal.innerHTML = '🔗 Google Agenda'; btnGcal.href = `https://calendar.google.com/calendar/u/0/r/eventedit/${ev.id}/${ev.src.id}`; btnGcal.target = "_blank"; actions.appendChild(btnGcal);
       var btnDel = document.createElement('button'); btnDel.className = 'btn btn-danger'; btnDel.innerHTML = '🗑️'; btnDel.title = 'Excluir'; btnDel.onclick = function() { deleteEvent(ev.src.id, ev.id); }; actions.appendChild(btnDel);
       body.appendChild(actions);
     });
   }
   function openEditModal(key, ev) {
+    // ===== BLOQUEIO CENTRAL: o popup modal de criar/editar NÃO existe na FUNCIONAL =====
+    if (!podeAbrirPopupEdicao(key)) { return; }
     currentEditEvent = ev;
     const isEdit = ev && ev.id;
     const calId = ev ? ev.src.id : getDefaultCalendarId(key);
@@ -1218,6 +1226,8 @@
     });
   }
   function openDayCreateModal(key, day) {
+    // Só existe criação de evento na TECNICA
+    if (!podeAbrirPopupEdicao(key)) { return; }
     const fakeEv = { src: { id: getDefaultCalendarId(key), name: 'Principal', color: key === 'f' ? '#0b8043' : '#8e24aa' }, start: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0), end: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10, 0), title: '', desc: '', id: null, customColor: null };
     openEditModal(key, fakeEv);
   }
@@ -1258,8 +1268,11 @@
       header.insertBefore(subtitle, header.firstChild); header.insertBefore(h2, header.firstChild);
       if (evs.length === 0) { var msg = document.createElement('div'); msg.style.cssText = 'padding: 20px; text-align: center; color: #6b7280;'; msg.textContent = 'Nenhum evento neste dia.'; body.appendChild(msg); }
       else { evs.forEach(function (ev) { var b = document.createElement('button'); b.className = 'item'; b.style.cssText = 'display:block; width:100%; text-align:left; border:0; border-bottom:1px solid #e5e7eb; border-radius:0; padding:10px 4px; background:none; cursor:pointer; font-size: 0.9rem;'; var titleColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ''; b.style.borderLeft = "5px solid " + (titleColor || ev.src.color); b.innerHTML = '<strong style="color:' + (titleColor || 'inherit') + '">' + (ev.allDay ? 'Dia inteiro' : hhmm(ev.start)) + '</strong> &nbsp; <strong style="color:' + (titleColor || 'inherit') + '">' + ev.title + '</strong>' + (many(key) ? ' <span style="color:#6b7280; font-size:0.8em">· ' + ev.src.name + '</span>' : ''); b.onclick = function () { openEvent(key, ev); }; body.appendChild(b); }); }
-      var actions = document.createElement('div'); actions.className = 'postit-actions';
-      var btnNew = document.createElement('button'); btnNew.className = 'btn btn-primary'; btnNew.innerHTML = '➕ Novo Evento neste dia'; btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); }; actions.appendChild(btnNew); body.appendChild(actions);
+      // Botão "Novo Evento neste dia" SOMENTE na TECNICA
+      if (podeAbrirPopupEdicao(key)) {
+        var actions = document.createElement('div'); actions.className = 'postit-actions';
+        var btnNew = document.createElement('button'); btnNew.className = 'btn btn-primary'; btnNew.innerHTML = '➕ Novo Evento neste dia'; btnNew.onclick = function() { closeModal(); openDayCreateModal(key, day); }; actions.appendChild(btnNew); body.appendChild(actions);
+      }
     });
   }
   function chip(key, ev) {
@@ -1298,7 +1311,7 @@
       var list = onDay(evs, d);
       list.slice(0, 3).forEach(function (ev) { c.appendChild(chip(key, ev)); });
       if (list.length > 3) { var m = el("button", "more", "+" + (list.length - 3) + " mais"); (function (dd, ll) { m.onclick = function (e) { e.stopPropagation(); openDay(key, dd, ll); }; })(d, list); c.appendChild(m); }
-      (function(dd) { c.onclick = function() { if (list.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, list); }; })(d);
+      (function(dd) { c.onclick = function() { if (list.length === 0) { if (podeAbrirPopupEdicao(key)) openDayCreateModal(key, dd); } else { openDay(key, dd, list); } }; })(d);
       g.appendChild(c);
     }
     body.appendChild(g);
@@ -1311,7 +1324,7 @@
       var col = el("div", "col" + (same(d, new Date()) ? " today" : ""));
       col.appendChild(el("div", "hd", d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" })));
       var dayEvents = onDay(evs, d); dayEvents.forEach(function (ev) { col.appendChild(chip(key, ev)); });
-      (function(dd, evs) { col.onclick = function(e) { if (e.target.classList.contains('chip') || e.target.closest('.chip')) return; if (evs.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, evs); }; })(d, dayEvents);
+      (function(dd, evs) { col.onclick = function(e) { if (e.target.classList.contains('chip') || e.target.closest('.chip')) return; if (evs.length === 0) { if (podeAbrirPopupEdicao(key)) openDayCreateModal(key, dd); } else { openDay(key, dd, evs); } }; })(d, dayEvents);
       w.appendChild(col);
     }
     body.appendChild(w);
@@ -1322,7 +1335,7 @@
       d = addDays(r.start, i); var l = onDay(evs, d);
       var day = el("div", "day"); day.appendChild(el("div", "dh", dayLabel(d)));
       if (l.length > 0) { any = true; l.forEach(function (ev) { var row = el("button", "row"); row.appendChild(el("span", "hr", ev.allDay ? "Dia inteiro" : hhmm(ev.start) + " – " + hhmm(ev.end))); var displayColor = ev.customColor && COLOR_MAP[ev.customColor] ? COLOR_MAP[ev.customColor].hex : ev.src.color; row.style.borderLeft = "5px solid " + displayColor; var titleSpan = el("span", null, ev.title); if (ev.customColor && COLOR_MAP[ev.customColor]) { titleSpan.style.color = displayColor; titleSpan.style.fontWeight = '600'; } row.appendChild(titleSpan); if (many(key)) row.appendChild(el("span", "srcname", ev.src.name)); row.onclick = function (e) { e.stopPropagation(); openEvent(key, ev); }; day.appendChild(row); }); }
-      (function(dd, evs) { day.onclick = function(e) { if (e.target.classList.contains('row') || e.target.closest('.row')) return; if (evs.length === 0) openDayCreateModal(key, dd); else openDay(key, dd, evs); }; })(d, l);
+      (function(dd, evs) { day.onclick = function(e) { if (e.target.classList.contains('row') || e.target.closest('.row')) return; if (evs.length === 0) { if (podeAbrirPopupEdicao(key)) openDayCreateModal(key, dd); } else { openDay(key, dd, evs); } }; })(d, l);
       box.appendChild(day);
     }
     if (!any) box.appendChild(el("div", "msg", "Nenhum evento neste período.")); body.appendChild(box);
