@@ -393,6 +393,7 @@
   function many(key) { return CAL[key].sources.length > 1; }
   function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function ymdLocal(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function same(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
@@ -1171,7 +1172,7 @@
       var dtStartRow = document.createElement('div'); dtStartRow.className = 'datetime-row';
       var fieldStartDate = document.createElement('div'); fieldStartDate.className = 'field';
       var lblStartDate = document.createElement('label'); lblStartDate.textContent = 'Data de Início';
-      var inpStartDate = document.createElement('input'); inpStartDate.type = 'date'; inpStartDate.id = 'edit-start-date'; inpStartDate.value = startDate.toISOString().split('T')[0];
+      var inpStartDate = document.createElement('input'); inpStartDate.type = 'date'; inpStartDate.id = 'edit-start-date'; inpStartDate.value = ymdLocal(startDate);
       fieldStartDate.appendChild(lblStartDate); fieldStartDate.appendChild(inpStartDate); dtStartRow.appendChild(fieldStartDate);
       var fieldStartTime = document.createElement('div'); fieldStartTime.className = 'field';
       var lblStartTime = document.createElement('label'); lblStartTime.textContent = 'Hora de Início';
@@ -1190,7 +1191,7 @@
       var dtEndRow = document.createElement('div'); dtEndRow.className = 'datetime-row';
       var fieldEndDate = document.createElement('div'); fieldEndDate.className = 'field';
       var lblEndDate = document.createElement('label'); lblEndDate.textContent = 'Data de Término';
-      var inpEndDate = document.createElement('input'); inpEndDate.type = 'date'; inpEndDate.id = 'edit-end-date'; inpEndDate.value = endDate.toISOString().split('T')[0];
+      var inpEndDate = document.createElement('input'); inpEndDate.type = 'date'; inpEndDate.id = 'edit-end-date'; inpEndDate.value = ymdLocal(endDate);
       fieldEndDate.appendChild(lblEndDate); fieldEndDate.appendChild(inpEndDate); dtEndRow.appendChild(fieldEndDate);
       var fieldEndTime = document.createElement('div'); fieldEndTime.className = 'field';
       var lblEndTime = document.createElement('label'); lblEndTime.textContent = 'Hora de Término';
@@ -1203,7 +1204,7 @@
       var selM2 = document.createElement('select'); selM2.id = 'edit-end-minute';
       times.minutes.forEach(function(m) { var opt = document.createElement('option'); opt.value = m; opt.textContent = m; if (String(endDate.getMinutes()).padStart(2,'0') === m) opt.selected = true; selM2.appendChild(opt); });
       divM2.appendChild(lblM2); divM2.appendChild(selM2);
-      timePairEnd.appendChild(divH2); divM2.appendChild(divM2 ? selM2 : selM2);
+      timePairEnd.appendChild(divH2); timePairEnd.appendChild(divM2);
       fieldEndTime.appendChild(lblEndTime); fieldEndTime.appendChild(timePairEnd); dtEndRow.appendChild(fieldEndTime); body.appendChild(dtEndRow);
       var fieldDesc = document.createElement('div'); fieldDesc.className = 'field';
       var lblDesc = document.createElement('label'); lblDesc.textContent = 'Descrição / Conteúdo';
