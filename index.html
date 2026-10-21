@@ -24,10 +24,10 @@
   #auth-area { display: flex; gap: 10px; align-items: center; }
   #login-btn { background: #1a73e8; color: white; border: none; font-weight: bold; display: none; }
   #logout-btn { background: #c5221f; color: white; border: none; display: none; }
-  #notif-btn { background: #f59e0b; color: white; border: none; font-weight: bold; }
-  #notif-btn.granted { background: #10b981; }
   #keepawake-btn { background: #6b7280; color: white; border: none; font-weight: bold; }
   #keepawake-btn.on { background: #10b981; }
+  #companion-btn { background: #0ea5e9; color: white; border: none; font-weight: bold; }
+  #companion-btn.on { background: #10b981; }
   #test-btn { background: #6264a7; color: white; border: none; font-weight: bold; }
   main { flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; padding:8px; }
   .panel { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
@@ -340,9 +340,9 @@
     <span id="auth-status" class="lbl">Carregando sistema...</span>
     <button id="login-btn" onclick="handleAuthClick()">🔒 Entrar com Google</button>
     <button id="logout-btn" onclick="handleSignoutClick()">🚪 Sair</button>
-    <button id="notif-btn" onclick="ativarNotificacoesAgenda()" title="Ativar notificações do sistema">🔔 Ativar Notificações</button>
+    <button id="companion-btn" onclick="alternarCompanheira()" title="Abre uma janela independente que exibe o popup da agenda sobre as outras guias">🪟 Janela de Alertas</button>
     <button id="keepawake-btn" onclick="alternarKeepAwake()" title="Impede o Chrome de congelar a aba em segundo plano">⏻ Manter Ativo</button>
-    <button id="test-btn" onclick="testarAlertaAgora()" title="Dispara um alerta de teste AGORA (toast + balão do Windows)">🧪 Testar</button>
+    <button id="test-btn" onclick="testarAlertaAgora()" title="Dispara um alerta de teste AGORA">🧪 Testar</button>
   </div>
   <div class="group">
     <span class="lbl">Mostrar:</span>
@@ -526,7 +526,6 @@
     document.getElementById('auth-status').textContent = "✅ Conectado";
     load();
     iniciarSistemaAlertas();
-    atualizarEstadoBotaoNotificacao();
   }
   function handleAuthClick() { tokenClient.requestAccessToken({prompt: 'consent'}); }
   function handleSignoutClick() {
@@ -538,16 +537,16 @@
   }
 
   // ======================================================================
-  // ===== SISTEMA DE ALERTAS v4 ==========================================
-  // ===== - Chave inclui horário do evento (remarcou => reseta flags) ====
-  // ===== - Storage v4 (invalida flags velhas que travavam testes) =======
-  // ===== - Logs [ALERTA] no console para diagnóstico =====================
-  // ===== - Botão 🧪 Testar ===============================================
+  // ===== SISTEMA DE ALERTAS v7 ==========================================
+  // ===== - POPUP DA AGENDA em JANELA PRÓPRIA (companheira) ==============
+  // ===== - Sem balões do sistema (desativados por padrão) ===============
+  // ===== - Disparo único 15/10/5 + repetição enquanto oculto ============
   // ======================================================================
   
   const MINUTOS_ALERTA = [15, 10, 5];
   const ALERTA_STORAGE_KEY = "agenda_alertas_v4";
-  const DEBUG_ALERTAS = true; // mude para false para silenciar o console
+  const NOTIFICACAO_SISTEMA_ATIVA = false; // mude para true se quiser TAMBÉM o balão do Windows
+  const DEBUG_ALERTAS = true;
   
   function logA() {
     if (!DEBUG_ALERTAS) return;
@@ -580,7 +579,7 @@
     });
   }
   
-  // ---------- KEEP-AWAKE: impede o Chrome de CONGELAR a aba oculta ----------
+  // ---------- KEEP-AWAKE ----------
   const keepAwake = { ctx: null, nodes: null, ativo: false, desejado: false };
   
   function iniciarKeepAwake() {
@@ -641,7 +640,161 @@
     }
   }, true);
   
-  // ---------- Verificação dos marcos 15 / 10 / 5 (disparo único) ----------
+  // ---------- JANELA COMPANHEIRA (o popup da agenda em janela própria) ----------
+  let compWin = null;
+  
+  const COMPANION_CSS = `
+    html,body{margin:0;height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;}
+    #root{height:100%;padding:6px;box-sizing:border-box;position:relative;}
+    .standby{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#6b7280;font-size:.8rem;text-align:center;gap:4px;}
+    .standby small{font-size:.7rem;opacity:.7;}
+    .teams-toast{background:#fff;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);width:100%;height:100%;overflow:hidden;border-left:4px solid #6264a7;animation:teamsSlideIn .3s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;box-sizing:border-box;}
+    .teams-toast.color-green{background:linear-gradient(135deg,#d4edda 0%,#c3e6cb 100%);border-left-color:#28a745;}
+    .teams-toast.color-green .teams-header{background:rgba(40,167,69,.15);}
+    .teams-toast.color-green .teams-event-title{color:#155724;}
+    .teams-toast.color-green .teams-event-time{color:#1e7e34;}
+    .teams-toast.color-green .teams-event-desc{color:#2f5a2f;}
+    .teams-toast.color-green .teams-btn-now{background:#28a745;}
+    .teams-toast.color-green .teams-progress-bar{background:#28a745;}
+    .teams-toast.color-red{background:linear-gradient(135deg,#f8d7da 0%,#f5c6cb 100%);border-left-color:#dc3545;}
+    .teams-toast.color-red .teams-header{background:rgba(220,53,69,.15);}
+    .teams-toast.color-red .teams-event-title{color:#721c24;}
+    .teams-toast.color-red .teams-event-time{color:#bd2130;}
+    .teams-toast.color-red .teams-event-desc{color:#5a1a1f;}
+    .teams-toast.color-red .teams-btn-now{background:#dc3545;}
+    .teams-toast.color-red .teams-progress-bar{background:#dc3545;}
+    .teams-toast.color-blue{background:linear-gradient(135deg,#d1ecf1 0%,#bee5eb 100%);border-left-color:#17a2b8;}
+    .teams-toast.color-blue .teams-header{background:rgba(23,162,184,.15);}
+    .teams-toast.color-blue .teams-event-title{color:#0c5460;}
+    .teams-toast.color-blue .teams-event-time{color:#117a8b;}
+    .teams-toast.color-blue .teams-event-desc{color:#1e4a52;}
+    .teams-toast.color-blue .teams-btn-now{background:#17a2b8;}
+    .teams-toast.color-blue .teams-progress-bar{background:#17a2b8;}
+    .teams-toast.color-orange{background:linear-gradient(135deg,#fff3cd 0%,#ffeeba 100%);border-left-color:#ffc107;}
+    .teams-toast.color-orange .teams-header{background:rgba(255,193,7,.15);}
+    .teams-toast.color-orange .teams-event-title{color:#856404;}
+    .teams-toast.color-orange .teams-event-time{color:#d39e00;}
+    .teams-toast.color-orange .teams-event-desc{color:#6b5205;}
+    .teams-toast.color-orange .teams-btn-now{background:#ffc107;}
+    .teams-toast.color-orange .teams-progress-bar{background:#ffc107;}
+    .teams-toast.color-purple{background:linear-gradient(135deg,#e2d4f0 0%,#d8c4e8 100%);border-left-color:#8e24aa;}
+    .teams-toast.color-purple .teams-header{background:rgba(142,36,170,.15);}
+    .teams-toast.color-purple .teams-event-title{color:#4a1f59;}
+    .teams-toast.color-purple .teams-event-time{color:#6a1b9a;}
+    .teams-toast.color-purple .teams-event-desc{color:#3d1a47;}
+    .teams-toast.color-purple .teams-btn-now{background:#8e24aa;}
+    .teams-toast.color-purple .teams-progress-bar{background:#8e24aa;}
+    .teams-header{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.08);}
+    .teams-icon{width:30px;height:30px;background:rgba(0,0,0,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;animation:bellRing 2s ease-in-out;}
+    .teams-header-text{flex:1;min-width:0;}
+    .teams-header-text .app-name{font-size:.7rem;font-weight:600;opacity:.8;text-transform:uppercase;letter-spacing:.03em;}
+    .teams-header-text .time-badge{font-size:.68rem;opacity:.75;margin-top:1px;}
+    .teams-body{padding:8px 10px;flex:1;min-height:0;}
+    .teams-event-title{font-size:.9rem;font-weight:600;margin:0 0 3px 0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .teams-event-time{font-size:.75rem;margin:0 0 3px 0;display:flex;align-items:center;gap:5px;}
+    .teams-event-desc{font-size:.75rem;margin:0;line-height:1.4;max-height:34px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+    .teams-actions{display:flex;gap:4px;padding:6px 10px 8px;border-top:1px solid rgba(0,0,0,.08);}
+    .teams-btn{flex:1;padding:6px 4px;border:none;border-radius:4px;font-size:.7rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;color:white;}
+    .teams-btn-now{background:#10b981;}
+    .teams-btn-snooze{background:#f59e0b;}
+    .teams-btn-edit{background:#6264a7;}
+    .teams-progress{height:2px;background:rgba(0,0,0,.1);}
+    .teams-progress-bar{height:100%;width:100%;animation:progressShrink 25s linear forwards;}
+    .teams-toast.closing{animation:teamsSlideOut .3s ease forwards;}
+    @keyframes teamsSlideIn{from{transform:translateX(120%);opacity:0}to{transform:none;opacity:1}}
+    @keyframes teamsSlideOut{from{transform:none;opacity:1}to{transform:translateX(120%);opacity:0}}
+    @keyframes bellRing{0%,100%{transform:rotate(0)}10%,30%{transform:rotate(-15deg)}20%,40%{transform:rotate(15deg)}50%{transform:rotate(0)}}
+    @keyframes progressShrink{from{width:100%}to{width:0%}}
+  `;
+  
+  function abrirJanelaCompanheira() {
+    if (compWin && !compWin.closed) { try { compWin.focus(); } catch (e) {} return compWin; }
+    const w = 380, h = 260;
+    const left = Math.max(0, (screen.availWidth - w) - 12);
+    const top = Math.max(0, (screen.availHeight - h) - 12);
+    compWin = window.open('', 'agendaAlertasCompanion', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + left + ',resizable=yes,scrollbars=no');
+    if (!compWin) {
+      alert('O navegador bloqueou a abertura da janela.\nPermita pop-ups para este site e clique novamente.');
+      return null;
+    }
+    try {
+      compWin.moveTo(left, top);
+      const doc = compWin.document;
+      doc.open();
+      doc.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Alertas Agenda</title><style>' + COMPANION_CSS + '</style></head><body><div id="root"></div></body></html>');
+      doc.close();
+      companionStandby();
+      logA('Janela companheira aberta — o popup da agenda agora aparece nela.');
+    } catch (e) {
+      console.warn('[ALERTA] Erro ao montar janela companheira:', e);
+      compWin = null;
+    }
+    atualizarBotaoCompanheira();
+    return compWin;
+  }
+  
+  function companionStandby() {
+    if (!compWin || compWin.closed) return;
+    try {
+      const root = compWin.document.getElementById('root');
+      if (root) root.innerHTML = '<div class="standby">🔔 Monitorando alertas da agenda<br><small>Disparos em 15 / 10 / 5 minutos</small></div>';
+    } catch (e) {}
+  }
+  
+  function alternarCompanheira() {
+    if (compWin && !compWin.closed) {
+      compWin.close();
+      compWin = null;
+    } else {
+      abrirJanelaCompanheira();
+    }
+    atualizarBotaoCompanheira();
+  }
+  window.alternarCompanheira = alternarCompanheira;
+  
+  function atualizarBotaoCompanheira() {
+    const b = document.getElementById('companion-btn');
+    if (!b) return;
+    const aberta = !!(compWin && !compWin.closed);
+    b.classList.toggle('on', aberta);
+    b.textContent = aberta ? '🪟 Janela de Alertas: ON' : '🪟 Janela de Alertas';
+  }
+  
+  setInterval(function() {
+    if (compWin && compWin.closed) compWin = null;
+    atualizarBotaoCompanheira();
+  }, 2000);
+  
+  function docAlvoCompanion() {
+    return (compWin && !compWin.closed) ? compWin.document : null;
+  }
+  
+  // ---------- Notificação do sistema (DESATIVADA por padrão) ----------
+  function notificarSistema(ev, minutos) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return null;
+    try {
+      const n = new Notification('⏰ Faltam ' + minutos + ' min — ' + ev.title, {
+        body: hhmm(ev.start) + ' – ' + hhmm(ev.end),
+        tag: 'agenda-' + ev.id + '-' + minutos,
+        requireInteraction: true,
+        silent: false
+      });
+      n.onclick = function() { window.focus(); n.close(); };
+      return n;
+    } catch (e) { return null; }
+  }
+  
+  // ---------- Verificação dos marcos 15 / 10 / 5 ----------
+  function chaveRep(ev) { return ev.id + '@' + ev.start.getTime(); }
+  const repeticoesAlerta = {};
+  
+  function pararRepeticao(chave) {
+    if (repeticoesAlerta[chave]) {
+      clearInterval(repeticoesAlerta[chave].interval);
+      delete repeticoesAlerta[chave];
+    }
+  }
+  
   function verificarAlertas() {
     if (!state.data.f && !state.data.t) return;
     
@@ -657,24 +810,20 @@
       if (agora >= eventStart) return;
       
       const restanteMin = (eventStart - agora) / 60000;
-      if (restanteMin > 20) return; // fora da janela de alertas
+      if (restanteMin > 20) return;
       
       const syncData = checkReminderSync(ev.id);
       if (syncData && syncData.action === 'dismissed') return;
       
-      // CHAVE COMPOSTA: se o evento for remarcado, o timestamp muda e as flags resetam
       const chave = ev.id + '@' + eventStart;
       if (!controle.eventos[chave]) controle.eventos[chave] = {};
       if (!reminderState[chave]) reminderState[chave] = { snoozeUntil: 0, lastLog: 0 };
       
-      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) {
-        return;
-      }
+      if (reminderState[chave].snoozeUntil && agora < reminderState[chave].snoozeUntil) return;
       
-      // Log de diagnóstico (no máx. a cada 15s por evento)
       if (restanteMin <= 16 && agora - reminderState[chave].lastLog > 15000) {
         reminderState[chave].lastLog = agora;
-        logA(`"${ev.title}" faltam ${restanteMin.toFixed(1)} min | já disparados: ${JSON.stringify(controle.eventos[chave])} | hidden=${document.hidden} | keepAwake=${keepAwake.ativo}`);
+        logA('"' + ev.title + '" faltam ' + restanteMin.toFixed(1) + ' min | disparados: ' + JSON.stringify(controle.eventos[chave]) + ' | hidden=' + document.hidden + ' | companion=' + !!docAlvoCompanion());
       }
       
       const devido = MINUTOS_ALERTA.find(function(minutos) {
@@ -686,7 +835,7 @@
           if (minutos >= devido) controle.eventos[chave][minutos] = true;
         });
         mudou = true;
-        logA(`>>> DISPARO ${devido} min -> "${ev.title}" (aba oculta: ${document.hidden})`);
+        logA('>>> DISPARO ' + devido + ' min -> "' + ev.title + '" (aba oculta: ' + document.hidden + ')');
         mostrarAlerta(ev, devido);
       }
     });
@@ -698,53 +847,62 @@
   }
   
   function mostrarAlerta(ev, minutos) {
-    const rs = reminderState[ev.id + '@' + ev.start.getTime()] || { snoozeUntil: 0 };
+    const rs = reminderState[chaveRep(ev)] || { snoozeUntil: 0 };
     
-    // Popup interno (visível com a aba da agenda na frente)
-    showReminderToast(ev, rs, minutos);
+    // O popup DA AGENDA: na janela companheira se estiver aberta, senão na guia
+    showReminderToast(ev, rs, minutos, docAlvoCompanion());
     
-    // Balão do SISTEMA (aparece sobre QUALQUER janela / navegador minimizado)
-    if (document.hidden) notificarSistema(ev, minutos);
+    if (NOTIFICACAO_SISTEMA_ATIVA && document.hidden) notificarSistema(ev, minutos);
+    
+    if (document.hidden) iniciarRepeticaoAlerta(ev, minutos);
   }
   
-  function notificarSistema(ev, minutos) {
-    if (!("Notification" in window)) { logA('Notification API indisponível neste navegador'); return; }
-    if (Notification.permission !== "granted") { logA('Permissão de notificação NÃO concedida'); return; }
-    try {
-      const n = new Notification(`⏰ Faltam ${minutos} min — ${ev.title}`, {
-        body: `${hhmm(ev.start)} – ${hhmm(ev.end)}${ev.desc ? '\n' + ev.desc.substring(0, 80) : ''}`,
-        tag: `agenda-${ev.id}-${minutos}`,
-        requireInteraction: true,
-        silent: false
-      });
-      n.onclick = function() { window.focus(); n.close(); };
-      n.onerror = function(e) { console.warn('[ALERTA] erro na notificação:', e); };
-      logA('Notificação do sistema enviada:', ev.title, minutos, 'min');
-    } catch (e) {
-      console.warn('[ALERTA] Falha na notificação do sistema:', e);
-    }
+  function iniciarRepeticaoAlerta(ev, minutos) {
+    const chave = chaveRep(ev);
+    pararRepeticao(chave);
+    const estado = {
+      count: 0,
+      interval: setInterval(function() {
+        const agora = Date.now();
+        const sync = checkReminderSync(ev.id);
+        const dismissado = sync && sync.action === 'dismissed';
+        const comecou = agora >= ev.start.getTime();
+        const st = reminderState[chave];
+        const snoozado = st && st.snoozeUntil && agora < st.snoozeUntil;
+        
+        if (!document.hidden || dismissado || comecou || estado.count >= 30) {
+          logA('Parando re-exibições de', ev.title);
+          pararRepeticao(chave);
+          return;
+        }
+        if (snoozado) return;
+        
+        estado.count++;
+        logA('Re-exibição #' + estado.count + ' (aba oculta) ->', ev.title);
+        showReminderToast(ev, st || {}, minutos, docAlvoCompanion());
+      }, 60000)
+    };
+    repeticoesAlerta[chave] = estado;
   }
   
-  // ---------- Botão 🧪 Testar: prova que o balão do Windows sobrepõe tudo ----------
+  // ---------- Botão 🧪 Testar ----------
   function testarAlertaAgora() {
     const inicio = new Date(Date.now() + 5 * 60000);
     const evFake = {
       id: 'teste-' + Date.now(),
-      title: '🧪 TESTE de Notificação',
+      title: '🧪 TESTE de Alerta',
       start: inicio,
       end: new Date(inicio.getTime() + 30 * 60000),
-      desc: 'Se este balão apareceu sobre outras janelas, o sistema está OK.',
+      desc: 'Popup da agenda em janela própria.',
       src: CAL.f.sources[0],
       customColor: 'blue'
     };
-    logA('Teste manual disparado.');
-    showReminderToast(evFake, {}, 5);
-    notificarSistema(evFake, 5); // força o balão do sistema mesmo com a aba visível
-    playNotificationSound();
+    logA('Teste manual. Janela companheira:', docAlvoCompanion() ? 'ABERTA' : 'fechada (popup sai só na guia da agenda)');
+    showReminderToast(evFake, {}, 5, docAlvoCompanion());
   }
   window.testarAlertaAgora = testarAlertaAgora;
   
-  // ---------- Timer: Web Worker + backup na página ----------
+  // ---------- Timer: Web Worker + backup ----------
   function iniciarTimerViaWorker() {
     try {
       const codigoWorker = `
@@ -775,7 +933,7 @@
     verificarAlertas();
     reminderWorker = iniciarTimerViaWorker();
     backupInterval = setInterval(verificarAlertas, 1000);
-    logA('Sistema de alertas v4 iniciado.');
+    logA('Sistema de alertas v7 iniciado.');
   }
   
   function pararSistemaAlertas() {
@@ -785,11 +943,13 @@
       reminderWorker = null;
     }
     if (backupInterval) { clearInterval(backupInterval); backupInterval = null; }
+    Object.keys(repeticoesAlerta).forEach(pararRepeticao);
   }
   
   document.addEventListener("visibilitychange", function() {
     if (!document.hidden) {
       if (keepAwake.desejado && keepAwake.ctx && keepAwake.ctx.state === 'suspended') iniciarKeepAwake();
+      Object.keys(repeticoesAlerta).forEach(pararRepeticao);
       if (isUserLoggedIn) {
         logA('Aba voltou a ficar visível — recalculando alertas.');
         verificarAlertas();
@@ -798,45 +958,10 @@
   });
   window.addEventListener("focus", function() { if (isUserLoggedIn) verificarAlertas(); });
   
-  // ---------- Botão 🔔 Notificações ----------
-  async function ativarNotificacoesAgenda() {
-    if (!("Notification" in window)) { alert("Este navegador não suporta notificações."); return; }
-    if (Notification.permission === "granted") {
-      iniciarKeepAwake();
-      alert("✅ Notificações já estão ativadas!");
-      return;
-    }
-    if (Notification.permission === "denied") {
-      alert("❌ Notificações bloqueadas. Libere no ícone 🔒 ao lado da URL.");
-      return;
-    }
-    const permissao = await Notification.requestPermission();
-    if (permissao === "granted") {
-      iniciarKeepAwake();
-      new Notification("📅 Notificações ativadas", { body: "Você receberá alertas da agenda aqui, mesmo com o navegador minimizado." });
-      atualizarEstadoBotaoNotificacao();
-    } else {
-      alert("⚠️ Permissão de notificação não concedida.");
-    }
-  }
-  
-  function atualizarEstadoBotaoNotificacao() {
-    const btn = document.getElementById('notif-btn');
-    if (!btn) return;
-    if ("Notification" in window && Notification.permission === "granted") {
-      btn.textContent = "✅ Notificações Ativas";
-      btn.classList.add('granted');
-    } else {
-      btn.textContent = "🔔 Ativar Notificações";
-      btn.classList.remove('granted');
-    }
-  }
-  
-  window.ativarNotificacoesAgenda = ativarNotificacoesAgenda;
-  atualizarEstadoBotaoNotificacao();
   atualizarBotaoKeepAwake();
+  atualizarBotaoCompanheira();
   // ======================================================================
-  // ===== FIM DO SISTEMA DE ALERTAS v4 ====================================
+  // ===== FIM DO SISTEMA DE ALERTAS v7 ====================================
   // ======================================================================
   
   function getEventColorClass(ev) {
@@ -847,14 +972,19 @@
     return 'color-blue';
   }
   
-  function showReminderToast(ev, rs, minutos) {
-    const container = document.getElementById('reminder-container');
-    const existingToast = container.querySelector(`[data-event-id="${ev.id}"]`);
-    if (existingToast) existingToast.remove();
+  function showReminderToast(ev, rs, minutos, docAlvo) {
+    const doc = docAlvo || document;
+    const isComp = !!docAlvo;
+    const container = isComp ? doc.getElementById('root') : document.getElementById('reminder-container');
+    if (!container) return;
     
-    const toast = document.createElement('div');
+    const existing = container.querySelector('[data-event-id="' + ev.id + '"]');
+    if (existing) existing.remove();
+    
+    const toast = doc.createElement('div');
     toast.className = 'teams-toast ' + getEventColorClass(ev);
     toast.dataset.eventId = ev.id;
+    if (isComp) toast.dataset.comp = '1';
     
     const timeText = `Faltam ${minutos} min • ${hhmm(ev.start)}`;
     
@@ -898,7 +1028,6 @@
       const chave = ev.id + '@' + ev.start.getTime();
       if (!reminderState[chave]) reminderState[chave] = {};
       reminderState[chave].snoozeUntil = Date.now() + 5 * 60000;
-      
       updateReminderSync(ev.id, 'snoozed');
       closeReminderToast(toast, rs, false);
     };
@@ -913,10 +1042,14 @@
   }
   
   function closeReminderToast(toast, rs, wasDismissed, fromSync = false) {
+    const isComp = toast.dataset && toast.dataset.comp === '1';
     if (!fromSync) {
       toast.classList.add('closing');
     }
-    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+      if (isComp) companionStandby();
+    }, 300);
     
     if (wasDismissed || (rs && rs.dismissed)) {
       setTimeout(() => {
